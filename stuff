@@ -1,0 +1,17 @@
+[General]
+Consoles = Mega Drive, Nintendo Entertainment System, SNES, N64
+Handelds = Game Boy Advance
+
+Virtual Targets = ScummVM
+
+
+[Launchers]
+DOS = DOSBox, RetroArch, ScummVM
+Windows = Wine
+Arcade = RetroArch
+Mega Drive = RetroArch
+NES = RetroArch
+SNES = RetroArch
+Game Boy Advance = RetroArch
+N64 = RetroArch
+

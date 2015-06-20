@@ -1,0 +1,39 @@
+[DOS]
+Launchers = RetroArch, DOSBox, ScummVM
+RetroArch.Core = dosbox_libretro
+Type = Computer
+
+[Windows]
+Launchers = Wine
+Type = Computer
+
+[Arcade]
+Launchers = RetroArch
+RetroArch.core = mame078_libretro
+
+[Mega Drive]
+Launchers = RetroArch
+RetroArch.core = picodrive_libretro
+Type = Console
+
+[NES]
+Launchers = RetroArch
+RetroArch.core = fceumm_libretro
+Type = Console
+
+[SNES]
+Launchers = RetroArch
+RetroArch.core = snes9x_libretro
+Type = Console
+
+[N64]
+Launchers = RetroArch
+RetroArch.core = mupen64plus_libretro
+Type = Console
+
+[Game Boy Advance]
+Launchers = RetroArch
+RetroArch.core = vba_next_libretro
+Type = Handheld
+
+

@@ -1,0 +1,16 @@
+[Wine]
+Required = developer, game root, genre, platform, target, title
+Optional = icon, id, included, launcher, optical disk, resolution, specialization
+
+[DOSBox]
+Required = developer, game root, genre, platform, target, title
+Optional = disk image, icon, id, included, launcher, optical disk, resolution, soundfont, specialization, antimicro profile
+
+[RetroArch]
+Required = developer, game root, genre, platform, target, title
+Optional = icon, id, included, launcher, resolution, specialization, antimicro profile
+
+[ScummVM]
+Required = developer, game root, genre, platform, target, title
+Optional = icon, id, included, launcher, resolution, specialization
+
