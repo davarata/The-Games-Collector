@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import glob
+import icon_creator
 import os
 import shutil
 import subprocess
@@ -101,9 +102,8 @@ def add_launcher_conf(game, descriptor, games_location):
         game.resolution = None
     else:
         game.resolution = descriptor['Resolution']
-        # TODO sort out WIDTHxHEIGHT (alt)
-        # if game.resolution not in {'640x480', '800x600', '1024x768', '1152x864', '1280x1024'}:
-        #     print('Unknown resolution: \'{}\'.'.format(game.resolution))
+        if game.resolution not in {'640x480', '800x600', '1024x768', '1152x864', '1280x1024'}:
+            print('Unknown resolution: \'{}\'.'.format(game.resolution))
 
     if descriptor.get('Optical Disk') is None:
         game.optical_disk = None
@@ -149,7 +149,11 @@ def add_dosbox_conf(game, descriptor, config):
         game.disk_image = None
     else:
         game.disk_image = descriptor['Disk Image']
-        files = glob.glob(os.path.join(config['DOS']['Disk Images Location'], game.disk_image + '.*'))
+
+        files = glob.glob(os.path.join(
+            config['General']['Games Location'],
+            descriptor['Game Root'],
+            game.disk_image + '.*'))
         if len(files) == 0:
             print('The disk image files could not be found.')
             sys.exit(1)
@@ -181,7 +185,7 @@ def add_retroarch_conf(game, config):
     game.core = os.path.join(config['RetroArch']['Cores Location'], game.core + '.so')
 
 
-# TODO finish!
+# TODO finish! - ??? FINISH WHAT?????
 def add_wine_conf(game, config):
     if len(game.launcher_params) == 1:
         game.core = game.launcher_params[0]
@@ -357,11 +361,11 @@ def launch_scummvm_game(game):
 
 def launch_game(id):
     game_descriptor = configparser.ConfigParser()
-    game_descriptor.read('/home/rebit/.config/game-launcher/' + id + '.game')
+    game_descriptor.read(os.environ.get('HOME') + '/.config/application-launcher/' + id + '.game')
     game = game_descriptor['Game']
 
     config = configparser.ConfigParser()
-    config.read('/home/rebit/.config/game-launcher/game-launcher.cfg')
+    config.read(os.environ.get('HOME') + '/.config/application-launcher/game-launcher.cfg')
 
     game_data = verify_descriptor(game_descriptor, config)
 
@@ -400,23 +404,8 @@ def launch_game(id):
         launch_scummvm_game(game_data)
 
 
-def add_icon(icon_file, config):
-    if not os.path.isfile(icon_file):
-        print('Icon file ' + icon_file + ' does not exist.')
-        sys.exit(1)
-
-    if not icon_file.endswith('.svg'):
-        print('Wrong extension type.')
-
-    icon_conf = config['Icons']
-    name = icon_file[icon_file.rfind('/') + 1: len(icon_file) - 4]
-    for size in icon_conf['Icon Sizes'].split(','):
-        icon_location = icon_conf['Icons Location'] + '/' + icon_conf['Icon Path Pattern'].replace('__size__', size)
-        subprocess.call(['inkscape', '-w=' + size, '-h=' + size, icon_file, '-e', icon_location + '/' + name + '.png'])
-
-
 def add_descriptor(game_desc_file):
-    shutil.copyfile(game_desc_file, '/home/rebit/.config/game-launcher/' + game_desc_file.rpartition('/')[2])
+    shutil.copyfile(game_desc_file, os.environ.get('HOME') + '/.config/application-launcher/' + game_desc_file.rpartition('/')[2])
 
 
 def add_menu_entry(game, config):
@@ -492,14 +481,14 @@ def add_game(game_desc_file, icon_file):
     game = game_descriptor['Game']
 
     config = configparser.ConfigParser()
-    config.read('/home/rebit/.config/game-launcher/game-launcher.cfg')
+    config.read(os.environ.get('HOME') + '/.config/application-launcher/game-launcher.cfg')
 
     verify_descriptor(game_descriptor, config)
 
     add_descriptor(game_desc_file)
     add_menu_entry(game, config)
     if icon_file is not None:
-        add_icon(icon_file, config)
+        icon_creator.add_icon(icon_file, config)
 
 
 def get_game_dialog(game_data, config, message):
@@ -507,7 +496,7 @@ def get_game_dialog(game_data, config, message):
     game_dialog.set_title(game_data.title)
 
     game_image = Gtk.Image()
-    game_image.set_from_file(config['Icons']['Icons Location'] + "/64x64/apps/" + game_data.icon + ".png")
+    game_image.set_from_file(config['Icons']['Icon set root'] + "/64x64/apps/" + game_data.icon + ".png")
     game_dialog.set_image(game_image)
 
     return game_dialog
