@@ -29,11 +29,11 @@ def load_globals():
     dosbox = LauncherData()
     dosbox.required = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
     dosbox.optional = {'disk image', 'icon', 'id', 'included', 'launcher', 'optical disk', 'resolution', 'soundfont',
-                       'specialization', 'antimicro profile'}
+                       'specialization'}
 
     retroarch = LauncherData()
     retroarch.required = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
-    retroarch.optional = {'icon', 'id', 'included', 'launcher', 'resolution', 'specialization', 'antimicro profile'}
+    retroarch.optional = {'icon', 'id', 'included', 'launcher', 'resolution', 'specialization'}
 
     scummvm = LauncherData()
     scummvm.required = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
@@ -113,12 +113,6 @@ def add_launcher_conf(game, descriptor, games_location):
         game.optical_disk = None
     else:
         game.optical_disk = descriptor['Optical Disk']
-
-    # This is a quick-fix hack to play keyboard games using game pad now
-    if descriptor.get('AntiMicro Profile') is None:
-        game.antimicro_profile = None
-    else:
-        game.antimicro_profile = os.path.join(game.game_root, descriptor['AntiMicro Profile'])
 
 
 def add_menu_conf(game, descriptor):
@@ -332,18 +326,10 @@ def launch_retroarch_game(game, game_descriptor):
         nvram = Path(game.games_location + '/nvram')
         nvram.symlink_to(game.game_root)
 
-    # # This is a quick-fix hack to speed up playing keyboard games using game pad
-    # if game.antimicro_profile is not None:
-    # antimicro = subprocess.Popen(['antimicro', '--hidden', '--profile', game.antimicro_profile])
-
     proc_params = ['retroarch', game.target, '--libretro', game.core, '--appendconfig', config_files]
     print(" ".join(proc_params))
     retroarch = subprocess.Popen(proc_params, cwd=game.working_dir)
     retroarch.wait()
-
-    # # This is a quick-fix hack to speed up playing keyboard games using game pad
-    # if game.antimicro_profile is not None:
-    #     antimicro.kill()
 
     if game.platform == 'Arcade':
         os.unlink(os.path.join(game.games_location, 'nvram'))
@@ -399,7 +385,6 @@ def launch_game(id):
         game_dialog.destroy()
 
     if game_data.resolution is not None:
-        # subprocess.call(['/usr/bin/xrandr', '--output', 'DVI-I-2', '-s', game_data.resolution])
         subprocess.call(['/usr/bin/xrandr', '-s', game_data.resolution])
 
     game_data.games_location = config['General']['Games Location']
