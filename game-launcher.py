@@ -28,7 +28,8 @@ def load_globals():
 
     dosbox = LauncherData()
     dosbox.required = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
-    dosbox.optional = {'disk image', 'icon', 'id', 'included', 'launcher', 'optical disk', 'resolution', 'soundfont', 'specialization', 'antimicro profile'}
+    dosbox.optional = {'disk image', 'icon', 'id', 'included', 'launcher', 'optical disk', 'resolution', 'soundfont',
+                       'specialization', 'antimicro profile'}
 
     retroarch = LauncherData()
     retroarch.required = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
@@ -73,6 +74,9 @@ def load_globals():
 
     global virtual_target_platforms
     virtual_target_platforms = {'ScummVM'}
+
+    global controllers
+    controllers = ['nes', 'snes', 'gameboyadvance', 'megadrive', 'arcade', 'xbox360']
 
 
 def add_launcher_conf(game, descriptor, games_location):
@@ -295,7 +299,7 @@ def replace_tokens(line, game_data):
         return line
 
 
-def launch_retroarch_game(game):
+def launch_retroarch_game(game, game_descriptor):
     launch_config = {}
 
     platform_config = os.path.join(game.platform_config, game.platform + '.cfg')
@@ -318,23 +322,28 @@ def launch_retroarch_game(game):
     for key in launch_config.keys():
         config_file.write(key + ' = ' + launch_config[key])
     config_file.close()
+    config_files = '/tmp/game-launcher.cfg'
+
+    if (game.mappings is not None) and (game.mappings.get('RetroArch') is not None):
+        write_retroarch_mappings(game.mappings['RetroArch'])
+        config_files += ',/tmp/retroarch_mappings.cfg'
 
     if game.platform == 'Arcade':
         nvram = Path(game.games_location + '/nvram')
         nvram.symlink_to(game.game_root)
 
-    # This is a quick-fix hack to speed up playing keyboard games using game pad
-    if game.antimicro_profile is not None:
-        antimicro = subprocess.Popen(['antimicro', '--hidden', '--profile', game.antimicro_profile])
+    # # This is a quick-fix hack to speed up playing keyboard games using game pad
+    # if game.antimicro_profile is not None:
+    # antimicro = subprocess.Popen(['antimicro', '--hidden', '--profile', game.antimicro_profile])
 
-    proc_params = ['retroarch', game.target, '--libretro', game.core, '--appendconfig', '/tmp/game-launcher.cfg']
+    proc_params = ['retroarch', game.target, '--libretro', game.core, '--appendconfig', config_files]
     print(" ".join(proc_params))
     retroarch = subprocess.Popen(proc_params, cwd=game.working_dir)
     retroarch.wait()
 
-    # This is a quick-fix hack to speed up playing keyboard games using game pad
-    if game.antimicro_profile is not None:
-        antimicro.kill()
+    # # This is a quick-fix hack to speed up playing keyboard games using game pad
+    # if game.antimicro_profile is not None:
+    #     antimicro.kill()
 
     if game.platform == 'Arcade':
         os.unlink(os.path.join(game.games_location, 'nvram'))
@@ -360,7 +369,7 @@ def launch_scummvm_game(game):
 
 
 def launch_game(id):
-    game_descriptor = configparser.ConfigParser()
+    game_descriptor = configparser.ConfigParser(strict=False)
     game_descriptor.read(os.environ.get('HOME') + '/.config/application-launcher/' + id + '.game')
     game = game_descriptor['Game']
 
@@ -390,22 +399,44 @@ def launch_game(id):
         game_dialog.destroy()
 
     if game_data.resolution is not None:
+        # subprocess.call(['/usr/bin/xrandr', '--output', 'DVI-I-2', '-s', game_data.resolution])
         subprocess.call(['/usr/bin/xrandr', '-s', game_data.resolution])
 
     game_data.games_location = config['General']['Games Location']
+
+    if game_descriptor.has_section('Controls'):
+        map_input(game_data, game_descriptor['Controls'])
+    else:
+        game_data.mappings = None
+
+    if (game_data.mappings is not None) and (game_data.mappings.get('Xmodmap') is not None):
+        write_xmodmap_mappings(game_data.mappings['Xmodmap'])
+        subprocess.Popen(['xmodmap', '/tmp/xmodmap_new'])
+
+    if (game_data.mappings is not None) and (game_data.mappings.get('Antimicro') is not None):
+        write_antimicro_mappings(game_data.mappings['Antimicro'])
+        antimicro = subprocess.Popen(['antimicro', '--hidden', '--profile', '/tmp/antimicro.gamecontroller.amgp'])
+
     if game_data.launcher == 'DOSBox':
         launch_dosbox_game(game_data)
     elif game_data.launcher == 'RetroArch':
         game_data.platform_config = config['General']['Platform Config']
-        launch_retroarch_game(game_data)
+        launch_retroarch_game(game_data, game_descriptor)
     elif game_data.launcher == 'Wine':
         launch_wine_game(game_data)
     elif game_data.launcher == 'ScummVM':
         launch_scummvm_game(game_data)
 
+    if (game_data.mappings is not None) and (game_data.mappings.get('Xmodmap') is not None):
+        subprocess.Popen(['xmodmap', '/tmp/xmodmap_revert'])
+
+    if (game_data.mappings is not None) and (game_data.mappings.get('Antimicro') is not None):
+        antimicro.kill()
+
 
 def add_descriptor(game_desc_file):
-    shutil.copyfile(game_desc_file, os.environ.get('HOME') + '/.config/application-launcher/' + game_desc_file.rpartition('/')[2])
+    shutil.copyfile(game_desc_file,
+                    os.environ.get('HOME') + '/.config/application-launcher/' + game_desc_file.rpartition('/')[2])
 
 
 def add_menu_entry(game, config):
@@ -474,7 +505,7 @@ def add_game(game_desc_file, icon_file):
     if not game_desc_file.endswith('.game'):
         print('Wrong extension type')
 
-    game_descriptor = configparser.ConfigParser()
+    game_descriptor = configparser.ConfigParser(strict=False)
     game_descriptor.read(game_desc_file)
     game_id = game_desc_file[game_desc_file.rfind('/') + 1: len(game_desc_file) - 5]
     game_descriptor.set('Game', 'ID', game_id)
@@ -496,7 +527,7 @@ def get_game_dialog(game_data, config, message):
     game_dialog.set_title(game_data.title)
 
     game_image = Gtk.Image()
-    game_image.set_from_file(config['Icons']['Icon set root'] + "/64x64/apps/" + game_data.icon + ".png")
+    game_image.set_from_file(config['Icons']['Icon set root'] + '/64x64/apps/' + game_data.icon + '.png')
     game_dialog.set_image(game_image)
 
     return game_dialog
@@ -504,6 +535,227 @@ def get_game_dialog(game_data, config, message):
 
 def update_game(game_desc_file, icon_file):
     pass
+
+
+def map_input(game, mappings):
+    game.mappings = {}
+
+    mappers = {}
+    mapper = configparser.ConfigParser()
+    mapper.read(os.environ.get('HOME') + '/.config/application-launcher/RetroArch.mapper')
+    mappers['RetroArch'] = mapper
+
+    mapper = configparser.ConfigParser()
+    mapper.read(os.environ.get('HOME') + '/.config/application-launcher/Xmodmap.mapper')
+    mappers['Xmodmap'] = mapper
+
+    mapper = configparser.ConfigParser()
+    mapper.read(os.environ.get('HOME') + '/.config/application-launcher/Antimicro.mapper')
+    mappers['Antimicro'] = mapper
+
+    known_physical_triggers = []
+    for key in mappers.keys():
+        mapper = mappers[key]
+        for physical_trigger in mapper['Physical Devices']:
+            if physical_trigger not in known_physical_triggers:
+                known_physical_triggers.append(physical_trigger.lower())
+
+    for virtual_trigger in mappings:
+        physical_triggers = []
+        descriptions = []
+
+        virtual_trigger_mapping = mappings[virtual_trigger]
+
+        if virtual_trigger_mapping.startswith('['):
+            description = virtual_trigger_mapping[1:-1].strip()
+        else:
+            remaining_string = virtual_trigger_mapping
+            while remaining_string != '':
+                physical_trigger, remaining_string = get_mapping_token(remaining_string, [' ', '/', '['])
+
+                physical_trigger = physical_trigger.strip().lower()
+                remaining_string = remaining_string.strip()
+                if remaining_string.startswith('/'):
+                    remaining_string = remaining_string[1:].strip()
+
+                if physical_trigger not in known_physical_triggers:
+                    print('Physical trigger not found: \'' + physical_trigger + '\'')
+                    exit()
+                physical_triggers.append(physical_trigger)
+
+                if remaining_string.startswith('['):
+                    description, remaining_string = get_mapping_token(remaining_string, [']'])
+                    descriptions.append(description[1:])
+
+                    if remaining_string.startswith(']'):
+                        remaining_string = remaining_string[1:].strip()
+
+                if remaining_string.startswith('/'):
+                    remaining_string = remaining_string[1:].strip()
+
+        # for physical_trigger in physical_triggers:
+        for index in range(len(physical_triggers)):
+            physical_trigger = physical_triggers[index]
+            virtual_device = virtual_trigger.split('.')[0]
+            physical_device = physical_trigger.split('.')[0]
+
+            mapping_type = None
+            if virtual_device in controllers:
+                mapping_type = game.launcher
+            else:
+                if virtual_device == 'keyboard':
+                    if physical_device in controllers:
+                        mapping_type = 'Antimicro'
+                    elif physical_device == 'keyboard':
+                        mapping_type = 'Xmodmap'
+
+            if game.mappings.get(mapping_type) is None:
+                game.mappings[mapping_type] = []
+
+            mapping = Struct()
+            mapping.player = '1'
+            mapping.virtual = mappers[mapping_type]['Virtual Devices'][virtual_trigger]
+            mapping.physical = mappers[mapping_type]['Physical Devices'][physical_trigger]
+            if len(descriptions) == 0:
+                mapping.description = ''
+            elif len(descriptions) == 1:
+                mapping.description = descriptions[0]
+            else:
+                mapping.description = descriptions[index]
+
+            game.mappings[mapping_type].append(mapping)
+
+
+def get_mapping_token(string, separators):
+    working_string = string
+    remaining_string = ''
+
+    index = 0
+    while index != -1:
+        for token in separators:
+            index = working_string.find(token)
+            if index >= 0:
+                break
+
+        if index == 0:
+            remaining_string = working_string + remaining_string
+            working_string = ''
+        elif index > 0:
+            remaining_string = working_string[index:] + remaining_string
+            working_string = working_string[:index]
+
+    return working_string, remaining_string
+
+
+def write_retroarch_mappings(mappings):
+    key_line = 'input_player{0}_{1} = "{2}"'
+    button_line = 'input_player{0}_{1}_btn = "{2}"'
+    axis_line = 'input_player{0}_{1}_axis = "{2}"'
+
+    mappings_file = open('/tmp/retroarch_mappings.cfg', 'w')
+    for mapping in mappings:
+        trigger_id, trigger_type = mapping.physical.split(' ')
+        trigger_type = trigger_type[1:-1]
+
+        key = 'nul'
+        button = 'nul'
+        axis = 'nul'
+
+        if trigger_type == 'button':
+            button = trigger_id
+        elif trigger_type == 'axis':
+            axis = trigger_id
+        else:
+            key = trigger_id
+
+        mappings_file.write('# ' + mapping.description[1:-1] + os.linesep)
+        mappings_file.write(key_line.format(mapping.player, mapping.virtual, key) + os.linesep)
+        mappings_file.write(button_line.format(mapping.player, mapping.virtual, button) + os.linesep)
+        mappings_file.write(axis_line.format(mapping.player, mapping.virtual, axis) + os.linesep)
+        mappings_file.write(os.linesep)
+
+    mappings_file.close()
+
+
+def write_xmodmap_mappings(mappings):
+    output = subprocess.check_output(['xmodmap', '-pke'], universal_newlines=True)
+
+    mappings_file = open('/tmp/xmodmap_revert', 'w')
+    for line in output.split(os.linesep):
+        config_line = [column for column in line.split(' ') if column.strip() != '']
+        for mapping in mappings:
+            if (len(config_line) > 3) and (config_line[3].lower() == mapping.physical.lower()):
+                mappings_file.write(line + os.linesep)
+    mappings_file.close()
+
+    mappings_file = open('/tmp/xmodmap_new', 'w')
+    for mapping in mappings:
+        mappings_file.write('! ' + mapping.description + os.linesep)
+        mappings_file.write('keysym ' + mapping.physical + ' = ' + mapping.virtual + os.linesep)
+        mappings_file.write(os.linesep)
+    mappings_file.close()
+
+
+def write_antimicro_mappings(mappings):
+    # button, trigger, stickbutton, dpadbutton
+    entry_xml = \
+        '<{0} index="{1}">' + os.linesep + \
+        ' <slots>' + os.linesep + \
+        '  <slot>' + os.linesep + \
+        '   <code>{2}</code>' + os.linesep + \
+        '   <mode>keyboard</mode>' + os.linesep + \
+        '  </slot>' + os.linesep + \
+        ' </slots>' + os.linesep + \
+        '</{0}>'
+
+    sets = {}
+    for mapping in mappings:
+        parameters = mapping.physical.split(',')
+        trigger_value = parameters[0]
+        trigger_type = parameters[1]
+        if len(parameters) == 3:
+            index = parameters[2]
+        else:
+            index = '1'
+
+        if trigger_type == 'button':
+            set_id = 'button'
+        else:
+            set_id = trigger_type + ' ' + index
+            trigger_type += 'button'
+
+        if sets.get(set_id) is None:
+            sets[set_id] = []
+
+        sets[set_id].append('<!-- ' + mapping.description + ' -->' + os.linesep +
+            entry_xml.format(trigger_type, trigger_value, mapping.virtual))
+
+    mappings_file = open('/tmp/antimicro.gamecontroller.amgp', 'w')
+    mappings_file.write('<?xml version="1.0" encoding="UTF-8"?>' + os.linesep)
+    mappings_file.write('<gamecontroller configversion="16" appversion="2.12">' + os.linesep)
+    mappings_file.write('  <sets>' + os.linesep)
+    mappings_file.write('    <set index="1">' + os.linesep)
+    indentation = '      '
+    for set_id in sets.keys():
+        if set_id is not 'button':
+            name, index = set_id.split(' ')
+            mappings_file.write(indentation + '<' + name + ' index="' + index + '">' + os.linesep)
+            indentation += '  '
+            for set_entry in sets[set_id]:
+                set_entry = set_entry.replace(os.linesep, os.linesep + indentation)
+                mappings_file.write(indentation + set_entry + os.linesep)
+            indentation = indentation[:-2]
+            mappings_file.write(indentation + '</' + name + '>' + os.linesep)
+        else:
+            for set_entry in sets[set_id]:
+                set_entry = set_entry.replace(os.linesep, os.linesep + indentation)
+                mappings_file.write(indentation + set_entry + os.linesep)
+
+    mappings_file.write('    </set>' + os.linesep)
+    mappings_file.write('  </sets>' + os.linesep)
+    mappings_file.write('</gamecontroller>' + os.linesep)
+
+    mappings_file.close()
 
 
 load_globals()

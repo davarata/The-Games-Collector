@@ -3,6 +3,7 @@ import argparse
 import os
 import subprocess
 import sys
+from gi.repository import Gtk, Gdk
 
 
 def add_icon(icon_file, config):
