@@ -1,0 +1,110 @@
+Commit [?]
+
+The main focus in this version was to add plug-in support.
+
+Overall
+-------
+ - Added plug-in support. The main reason being to break the tight coupling between some of the components and the
+   launcher. A lot of the functionality that can have different implementations has been converted to plug-ins:
+    * Launchers: DOSBox, Linux (new), RetroArch, ScummVM, Wine
+    * Input mappers: antimicro, RetroArch, Xmodmap
+    * Display handlers: Xrandr
+
+ - Started to use methods in subclasses only for performing actions and not for returning values (like getter methods).
+   Instead of calling getter methods, the variables that contain the value is accessed directly. Since private
+   variables do not exist there was no point in bothering with getter and setter methods.
+
+ - - - - -
+
+
+Individual components
+---------------------
+ - Plug-in handler (plugin_handler.py)
+   The heart of the plug-in functionality. It will load all the plug-ins of a specific type and is used to get the
+   specific implementation required.
+
+ - Display handler (display_handler.py)
+   Contains the base class for display handlers. The reason for adding display handlers is because using Xrandr via a
+   subprocess is not in my opinion the best solution, so in future other display handlers might be added that in some
+   cases may work better and to add a display handler for Windows (very far into the future), when Windows support is
+   added.  
+
+ - XRandr (xrandr_display_handler.py)
+    * Apart from being converted into a plug-in, better support has been added for dual screen setups:
+       - The most noticeable change has been that the 2nd monitor does not get disabled after a game is finished.
+       - The resolutions of both screens can be set in the game descriptor file.
+       - Any one of the screens can be turned off as well (sadly required just to get Baldur's gate to display
+         properly).
+    * SINGLE SCREEN SUPPORT BROKEN. The game launcher currently does not work with one screen. It will be fixed in a
+      future release (soon).
+
+ - RetroArch (retroarch_launcher.py)
+    * Moved the input mapping functionality to a separate RetroArch input mapper (a plug-in).
+
+ - Wine (wine_launcher.py)
+    * A new parameter has been added: USE_ALTERNATE_WAIT
+      For some unknown reason, Python does not actually wait for the subprocess to finish. The game launcher then exits
+      normally, thinking that the Wine game has finished. All actions that has to be taken after the game has finished
+      (such as changing the resolution) is then performed. The most noticeable being a resolution change. This parameter
+      allows another method to be used to determine if a game has finished (looking at the processes listed in /proc).
+
+ - Input mappers (input_mapper.py)
+    * Contains the base class for input mapping plug-ins.
+
+ - The Games Collector (the-games-collector.py)
+    * An effort has also been put into trying to reuse code while adding a game and launching a game with the goal of
+      using the same validation for both. Not everything in the game descriptor file gets properly validated when a
+      game is being added, especially the input mappings.
+    * Renamed from game-launcher.py to the-games-collector.py), mostly to avoid confusion with the launcher plug-in file
+      (plugins/launchers/game_launcher.py).
+    * All of the launcher specific code has been moved to their respective launchers:
+       - The contents of the load_globals() method.
+       - add_dosbox_conf(...), add_retroarch_conf(...) and add_wine_conf(...).
+       - launch_dosbox_game(...), launch_retroarch_game(...) (with replace_tokens(...), launch_wine_game(...) and
+         launch_scummvm_game(...).
+       - The launcher specific code in launch_game(...)
+    * The functionality of add_launcher_conf(...) has been moved to init_launcher(...).
+    * The add_menu_conf(...) method has been renamed to set_game_menu_data(...)
+    * Pre-launch methods have been added to remove some of the functionality from the launch_game(...) method
+      configure_env(...) and activate_input_mappers(...)
+      This has been done to help make the launch_game(...) method a bit more generic, focusing more on the
+      actions that needs to be taken and not the specifics of those actions.
+    * Similarly, post-launch methods have been added to remove some of the functionality from the launch_game(...)
+      method: revert_env(...) and  deactivate_input_mappers(...)
+    * The update_game(...) method has been removed, including the update parameter. It can be added again if it is
+      needed.
+    * All the mapper specific code has been moved to their respective mappers:
+       - write_retroarch_mappings(...), write_xmodmap_mappings(...) and write_antimicro_mappings(...)
+    * Some of the functionality of the map_input method has been moved to input_mapper.py
+    * The launch parameter has been changed to play.
+    * The game-launcher has been updated to allow all the existing game descriptors to be validated. This is mostly
+      used during testing.
+    * Some additional refactoring was done to reduce the size of the init_launcher(...) method, such as the setting of
+      certain properties as well as checking for the optical disk.
+
+ - Some (not sure if it is all of them) instances in the code where loading configuration files have been using
+   hard-coded locations have been changed to rather call a method (get_config_file(...)) that contains all the expected
+   locations where configuration files can be found. This utility method was placed in utils.py
+
+ - The mapper files (containing the mapping values required for the specific mappers) have been added: antimicro.mapper,
+   RetroArch.mapper, Xmodmap.mapper
+
+ - Some configuration files have been added:
+    * Template configuration files for the icon creator and the game launcher (the-games-collector):
+      config/game-launcher.cfg and config/icon-creator.cfg
+    * A configuration file for the GameLauncher plugin: GameLauncher.cfg).
+
+ - Some unused files where removed.
+
+ - - - - - 
+
+
+Backwards compatibility
+-----------------------
+
+THIS VERSION IS NOT BACKWARDS COMPATIBLE
+
+ - The resolution property in the game descriptor file can now take two values as well as non-resolution values (like
+   'current' and 'off'). This will break previous versions of the game launcher.
+ - The new parameter for the wine launcher should simply be ignored. This has no effect on backwards compatibility.
+

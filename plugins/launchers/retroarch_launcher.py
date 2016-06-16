@@ -1,14 +1,12 @@
 import os
 import subprocess
-from pathlib import Path
 import sys
-from generic_launcher import GenericLauncher
+from pathlib import Path
+
+from plugins.launchers.game_launcher import GameLauncher
 
 
-class RetroArchLauncher(GenericLauncher):
-
-    def get_name(self):
-        return 'RetroArch'
+class RetroArchLauncher(GameLauncher):
 
     def get_platform_description(self):
         if self.game_data.platform == 'Arcade':
@@ -17,17 +15,17 @@ class RetroArchLauncher(GenericLauncher):
             return 'the ' + self.game_data.platform + ' console'
         elif self.game_data.platform in self.handhelds:
             return 'the ' + self.game_data.platform + ' handheld'
+        else:
+            return super(RetroArchLauncher, self).get_platform_description()
 
     def launch_game(self):
-        launch_config = {}
-
         platform_config = os.path.join(self.game_data.platform_config, self.game_data.platform + '.cfg')
         if os.path.isfile(platform_config):
             with open(platform_config) as f:
                 for line in f:
                     conf_entry = self.replace_tokens(line, self.game_data).split('=')
                     if len(conf_entry) > 1:
-                        launch_config[conf_entry[0].strip()] = conf_entry[1]
+                        self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
 
         game_config = self.game_data.target[:self.game_data.target.rfind('.')] + '.cfg'
         if os.path.isfile(game_config):
@@ -35,27 +33,30 @@ class RetroArchLauncher(GenericLauncher):
                 for line in f:
                     conf_entry = self.replace_tokens(line, self.game_data).split('=')
                     if len(conf_entry) > 1:
-                        launch_config[conf_entry[0].strip()] = conf_entry[1]
+                        self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
+
+        mapping_config = '/tmp/retroarch-mappings.cfg'
+        if os.path.isfile(mapping_config):
+            with open(mapping_config) as f:
+                for line in f:
+                    conf_entry = self.replace_tokens(line, self.game_data).split('=')
+                    if len(conf_entry) > 1:
+                        self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
 
         config_file = open('/tmp/game-launcher.cfg', 'w')
-        for key in launch_config.keys():
-            config_file.write(key + ' = ' + launch_config[key])
+        for key in sorted(self.launch_config.keys()):
+            config_file.write(key + ' = ' + self.launch_config[key] + os.linesep)
         config_file.close()
         config_files = '/tmp/game-launcher.cfg'
 
-        # TODO move these mappings to the rest - will eventually end up as part of a plug-in
-        if (self.game_data.mappings is not None) and (self.game_data.mappings.get('RetroArch') is not None):
-            self.write_retroarch_mappings(self.game_data.mappings['RetroArch'])
-            config_files += ',/tmp/retroarch_mappings.cfg'
-
-        if self.game_data.platform == 'Arcade':
-            nvram = Path(self.launcher_config['General']['Games Location'] + '/nvram')
-            nvram.symlink_to(self.game_data.game_root)
-
-        proc_params = ['retroarch', self.game_data.target, '--libretro', self.game_data.core, '--appendconfig', config_files]
-        print(" ".join(proc_params))
-        retroarch = subprocess.Popen(proc_params, cwd=self.game_data.working_dir)
-        retroarch.wait()
+        parameters = [
+            'retroarch',
+            self.game_data.target,
+            '--libretro',
+            self.game_data.core,
+            '--appendconfig',
+            config_files]
+        subprocess.Popen(parameters, cwd=self.game_data.working_dir).wait()
 
     def replace_tokens(self, line, game_data):
         if line.strip().startswith('#'):
@@ -68,6 +69,10 @@ class RetroArchLauncher(GenericLauncher):
                 return line
         else:
             return line
+
+    def configure_env(self):
+        if self.game_data.platform == 'Arcade':
+            Path(self.launcher_config['General']['Games Location'] + '/nvram').symlink_to(self.game_data.game_root)
 
     def revert_env(self):
         if self.game_data.platform == 'Arcade':
@@ -88,49 +93,27 @@ class RetroArchLauncher(GenericLauncher):
         self.game_data.core = os.path.join(self.launcher_config['RetroArch']['Cores Location'],
                                            self.game_data.core + '.so')
 
-    def write_retroarch_mappings(self, mappings):
-        key_line = 'input_player{0}_{1} = "{2}"'
-        button_line = 'input_player{0}_{1}_btn = "{2}"'
-        axis_line = 'input_player{0}_{1}_axis = "{2}"'
-
-        mappings_file = open('/tmp/retroarch_mappings.cfg', 'w')
-        for mapping in mappings:
-            trigger_id, trigger_type = mapping.physical.split(' ')
-            trigger_type = trigger_type[1:-1]
-
-            key = 'nul'
-            button = 'nul'
-            axis = 'nul'
-
-            if trigger_type == 'button':
-                button = trigger_id
-            elif trigger_type == 'axis':
-                axis = trigger_id
-            else:
-                key = trigger_id
-
-            mappings_file.write('# ' + mapping.description[1:-1] + os.linesep)
-            mappings_file.write(key_line.format(mapping.player, mapping.virtual, key) + os.linesep)
-            mappings_file.write(button_line.format(mapping.player, mapping.virtual, button) + os.linesep)
-            mappings_file.write(axis_line.format(mapping.player, mapping.virtual, axis) + os.linesep)
-            mappings_file.write(os.linesep)
-
-        mappings_file.close()
+    name = 'RetroArch'
+    supported_implementations = {'Arcade', 'DOS', 'Master System', 'Mega Drive', 'NES', 'SNES', 'Game Boy Advance', 'N64'}
 
     required_properties = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
     optional_properties = {'icon', 'id', 'included', 'launcher', 'resolution', 'specialization'}
 
+    launch_config = {}
+
     retroarch_cores = {'Arcade': 'mame078_libretro',
                        'DOS': 'dosbox_libretro',
+                       'Master System': 'picodrive_libretro',
                        'Mega Drive': 'picodrive_libretro',  #
                        'NES': 'fceumm_libretro',
                        'SNES': 'snes9x_libretro',
                        'Game Boy Advance': 'vba_next_libretro',
                        'N64': 'mupen64plus_libretro'}
 
-    consoles = {'Mega Drive',
+    consoles = {'Master System',
+                'Mega Drive',
                 'Nintendo Entertainment System',
                 'SNES',
-                'Nintendo 64'}
+                'N64'}
 
     handhelds = {'Game Boy Advance'}

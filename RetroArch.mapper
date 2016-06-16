@@ -1,0 +1,104 @@
+[Virtual Devices]
+# Arcade
+Arcade.Coin = select
+Arcade.Start = start
+Arcade.Up = up
+Arcade.Down = down
+Arcade.Left = left
+Arcade.Right = right
+Arcade.Button1 = b
+Arcade.Button2 = y
+Arcade.Button3 = x
+Arcade.Button4 = a
+Arcade.Button5 = l
+Arcade.Button6 = r
+
+# Gameboy Advance (GBA)
+GameBoyAdvance.Start = start
+GameBoyAdvance.Select = select
+GameBoyAdvance.A = b
+GameBoyAdvance.B = a
+GameBoyAdvance.L = l
+GameBoyAdvance.R = r
+
+# Master System
+MasterSystem.Start = start
+MasterSystem.Up = up
+MasterSystem.Down = down
+MasterSystem.Left = left
+MasterSystem.Right = right
+MasterSystem.A = a
+MasterSystem.B = b
+
+# Mega Drive
+MegaDrive.Start = start
+MegaDrive.Up = up
+MegaDrive.Down = down
+MegaDrive.Left = left
+MegaDrive.Right = right
+MegaDrive.A = y
+MegaDrive.B = b
+MegaDrive.C = a
+MegaDrive.X = l
+MegaDrive.Y = x
+MegaDrive.Z = r
+
+# N64
+N64.Start = start
+N64.Up = l_y_minus
+N64.Down = l_y_plus
+N64.Left = l_x_minus
+N64.Right = l_x_plus
+N64.A = a
+N64.B = b
+N64.L = l
+N64.R = r
+N64.Z = l2
+N64.cUp = r_y_minux
+N64.cDown = r_y_plus
+N64.cLeft = r_x_minus
+N64.cRight = r_x_plus
+
+# Super Nintendo Entertainment System (SNES)
+SNES.Start = start
+SNES.Select = select
+SNES.Up = up
+SNES.Down = down
+SNES.Left = left
+SNES.Right = right
+SNES.A = a
+SNES.B = b
+SNES.X = x
+SNES.Y = y
+SNES.L = l
+SNES.R = r
+
+[Physical Devices]
+Xbox360.Up = 13 (button)
+Xbox360.Down = 14 (button)
+Xbox360.Left = 11 (button)
+Xbox360.Right = 12 (button)
+Xbox360.A = 0 (button)
+Xbox360.B = 1 (button)
+Xbox360.X = 2 (button)
+Xbox360.Y = 3 (button)
+Xbox360.LeftButton = 4 (button)
+Xbox360.LeftTrigger = +2 (axis)
+Xbox360.RightButton = 5 (button)
+Xbox360.RightTrigger = +5 (axis)
+Xbox360.LeftAnalogButton = 9 (button)
+Xbox360.RightAnalogButton = 10 (button)
+Xbox360.Start = 7 (button)
+Xbox360.Back = 6 (button)
+Xbox360.Connect = 8 (button)
+Xbox360.LeftAnalogUp = -1 (axis)
+Xbox360.LeftAnalogDown = +1 (axis)
+Xbox360.LeftAnalogLeft = -0 (axis)
+Xbox360.LeftAnalogRight = +0 (axis)
+Xbox360.RightAnalogUp = -4 (axis)
+Xbox360.RightAnalogDown = +4 (axis)
+Xbox360.RightAnalogLeft = -3 (axis)
+Xbox360.RightAnalogRight = +3 (axis)
+
+
+

@@ -1,0 +1,72 @@
+[General]
+Launchers=RetroArch
+Mappings=NES->Xbox360 SNES->Xbox360 MegaDrive->Xbox360
+
+[Virtual Devices]
+Keyboard.Escape = Escape
+Keyboard.Enter = Return
+Keyboard.Space = space
+Keyboard.F1 = F1
+Keyboard.F12 = F12
+Keyboard.Tab = Tab
+Keyboard.A = A
+Keyboard.B = B
+Keyboard.C = C
+Keyboard.D = D
+Keyboard.E = E
+Keyboard.F = F
+Keyboard.G = G
+Keyboard.H = H
+Keyboard.I = I
+Keyboard.J = J
+Keyboard.K = K
+Keyboard.L = L
+Keyboard.M = M
+Keyboard.N = N
+Keyboard.O = O
+Keyboard.P = P
+Keyboard.Q = Q
+Keyboard.R = R
+Keyboard.S = S
+Keyboard.T = T
+Keyboard.U = U
+Keyboard.V = V
+Keyboard.W = W
+Keyboard.X = X
+Keyboard.Y = Y
+Keyboard.Z = Z
+
+[Physical Devices]
+Keyboard.Escape = Escape
+Keyboard.Enter = Return
+Keyboard.Space = space
+Keyboard.F1 = F1
+Keyboard.F12 = F12
+Keyboard.Tab = Tab
+Keyboard.A = A
+Keyboard.B = B
+Keyboard.C = C
+Keyboard.D = D
+Keyboard.E = E
+Keyboard.F = F
+Keyboard.G = G
+Keyboard.H = H
+Keyboard.I = I
+Keyboard.J = J
+Keyboard.K = K
+Keyboard.L = L
+Keyboard.M = M
+Keyboard.N = N
+Keyboard.O = O
+Keyboard.P = P
+Keyboard.Q = Q
+Keyboard.R = R
+Keyboard.S = S
+Keyboard.T = T
+Keyboard.U = U
+Keyboard.V = V
+Keyboard.W = W
+Keyboard.X = X
+Keyboard.Y = Y
+Keyboard.Z = Z
+

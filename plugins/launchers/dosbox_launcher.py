@@ -1,15 +1,13 @@
 import glob
 import os
 import subprocess
-import time
 import sys
-from generic_launcher import GenericLauncher
+import time
+
+from plugins.launchers.game_launcher import GameLauncher
 
 
-class DOSBoxLauncher(GenericLauncher):
-
-    def get_name(self):
-        return 'DOSBox'
+class DOSBoxLauncher(GameLauncher):
 
     def launch_game(self):
         if self.game_data.soundfont is not None:
@@ -20,8 +18,7 @@ class DOSBoxLauncher(GenericLauncher):
             self.timidity = subprocess.Popen(['timidity', '-iA', '-c', '/tmp/timidity.cfg'])
             time.sleep(1)
 
-        dosbox = subprocess.Popen(['dosbox', '-conf', self.game_data.target])
-        dosbox.wait()
+        subprocess.Popen(['dosbox', '-conf', self.game_data.target]).wait()
 
     def revert_env(self):
         if self.game_data.soundfont is not None:
@@ -52,7 +49,9 @@ class DOSBoxLauncher(GenericLauncher):
                 print('The sound font could not be found.')
                 sys.exit(1)
 
+    name = 'DOSBox'
     timidity = None
+    supported_implementations = {'DOS'}
     required_properties = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
     optional_properties = {'disk image', 'icon', 'id', 'included', 'launcher', 'optical disk', 'resolution',
                            'soundfont', 'specialization'}

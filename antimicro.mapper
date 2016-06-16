@@ -1,0 +1,73 @@
+[Virtual Devices]
+Keyboard.Tilde = 0x60
+Keyboard.Comma = 0x2c
+Keyboard.Period = 0x2e
+
+Keyboard.A = 0x41
+Keyboard.D = 0x44
+Keyboard.E = 0x45
+Keyboard.F = 0x46
+Keyboard.Q = 0x51
+Keyboard.R = 0x52
+Keyboard.S = 0x53
+Keyboard.W = 0x57
+
+Keyboard.Space = 0x20
+
+Keyboard.OpenBlockBracket = 0x5b
+Keyboard.CloseBlockBracket = 0x5d
+
+Keyboard.Up = 0x1000013
+Keyboard.Down = 0x1000015
+Keyboard.Left = 0x1000012
+Keyboard.Right = 0x1000014
+
+Keyboard.Numpad0 = 0x11000006
+Keyboard.Numpad1 = 0x11000011
+Keyboard.Numpad2 = 0x11000015
+Keyboard.Numpad3 = 0x11000016
+Keyboard.Numpad4 = 0x11000012
+Keyboard.Numpad5 = 0x1100000b
+Keyboard.Numpad6 = 0x11000014
+Keyboard.Numpad7 = 0x11000010
+Keyboard.Numpad8 = 0x11000013
+Keyboard.Numpad9 = 0x11000017
+Keyboard.NumpadEnter = 0x1000005
+
+Keyboard.Enter = 0x1000004
+Keyboard.Escape = 0x1000000
+Keyboard.LeftAlt = 0x1000023
+Keyboard.LeftControl = 0x1000021
+Keyboard.RightShift = 0x11000020
+
+Keyboard.F1 = 0x1000030
+Keyboard.F10 = 0x1000039
+
+
+[Physical Devices]
+Xbox360.Up = 1,dpad
+Xbox360.Down = 4,dpad
+Xbox360.Left = 8,dpad
+Xbox360.Right = 2,dpad
+Xbox360.A = 1,button
+Xbox360.B = 2,button
+Xbox360.X = 3,button
+Xbox360.Y = 4,button
+Xbox360.LeftButton = 10,button
+Xbox360.LeftTrigger = 2,trigger
+Xbox360.RightButton = 11,button
+Xbox360.RightTrigger = 2,trigger,2
+Xbox360.LeftAnalogButton = 8,button
+Xbox360.RightAnalogButton = 9,button
+Xbox360.Start = 7,button
+Xbox360.Back = 5,button
+Xbox360.Connect = 6,button
+Xbox360.LeftAnalogUp = 1,stick
+Xbox360.LeftAnalogDown = 5,stick
+Xbox360.LeftAnalogLeft = 7,stick
+Xbox360.LeftAnalogRight = 3,stick
+Xbox360.RightAnalogUp = 1,stick,2
+Xbox360.RightAnalogDown = 5,stick,2
+Xbox360.RightAnalogLeft = 7,stick,2
+Xbox360.RightAnalogRight = 3,stick,2
+
