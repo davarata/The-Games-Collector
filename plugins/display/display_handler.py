@@ -7,7 +7,7 @@ class DisplayHandler(Plugin):
         self.install_dir = install_dir
         self.load_plugins('plugins.display', DisplayHandler)
 
-    def change_resolution(self):
+    def change_resolution(self, parameters):
         pass
 
     def save_resolution(self):

@@ -15,6 +15,10 @@ Arcade.Button6 = r
 
 # Gameboy Advance (GBA)
 GameBoyAdvance.Start = start
+GameBoyAdvance.Up = up
+GameBoyAdvance.Down = down
+GameBoyAdvance.Left = left
+GameBoyAdvance.Right = right
 GameBoyAdvance.Select = select
 GameBoyAdvance.A = b
 GameBoyAdvance.B = a

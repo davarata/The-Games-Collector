@@ -15,11 +15,6 @@ from plugins.launchers.game_launcher import GameLauncher
 # TODO choose between game_data and game
 # TODO remove launcher-specific configuration from the main launcher config
 from plugins.mappers.input_mapper import InputMapper
-from plugins.display.xrandr_display_handler import XrandrDisplayHandler
-
-
-class Struct:
-    pass
 
 
 # TODO Change: This needs to change to allow a custom icon (which might not be the same name as the
@@ -105,9 +100,8 @@ def add_menu_entry(launcher, game_properties):
 
 
 def change_resolution(game_data):
-    if game_data.resolution is not None:
-        display_handler.get_implementation().change_resolution(game_data.resolution)
-        # subprocess.call(['/usr/bin/xrandr', '-s', game_data.resolution])
+    if game_data['resolution'] is not None:
+        display_handler.get_implementation().change_resolution(game_data['resolution'])
 
 
 def check_expected_properties(launcher, game_properties):
@@ -141,14 +135,15 @@ def check_expected_properties(launcher, game_properties):
 
 
 # TODO rename to check_media. This might be moved to another script
+# TODO also, stop using hard-coded values (specified in the descriptor)
 def check_optical_disk(game_data, config, game):
-    if game_data.optical_disk is not None:
+    if game_data['optical_disk'] is not None:
         message = '\nPlease insert the optical disk with the label \'' + game['Optical Disk'].rpartition('/')[2] + '\''
 
         # temp hack. Add icon to game_data
         game_dialog = get_game_dialog(game_data, config, message)
 
-        missing = not os.path.isdir(game_data.optical_disk)
+        missing = not os.path.isdir(game_data['optical_disk'])
         while missing:
             game_dialog.show_all()
             response = game_dialog.run()
@@ -157,25 +152,26 @@ def check_optical_disk(game_data, config, game):
                 game_dialog.destroy()
                 sys.exit(1)
 
-            missing = not os.path.isdir(game_data.optical_disk)
+            missing = not os.path.isdir(game_data['optical_disk'])
 
         game_dialog.destroy()
 
 
 # TODO Decide if I want to pass launcher or game_data
-def configure_env(game_data):
+def configure_env(launcher):
     display_handler.get_implementation().save_resolution()
-    change_resolution(game_data)
+    change_resolution(launcher.game_data)
+    launcher.configure_env()
 
 
 # TODO move this to another script and make the gui implementation use plugins?
 def get_game_dialog(game_data, config, message):
     game_dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, message)
-    game_dialog.set_title(game_data.title)
+    game_dialog.set_title(game_data['title'])
 
     game_image = Gtk.Image()
-    if game_data.icon is not None and os.path.isfile(config['Icons']['Icon set root'] + '/64x64/apps/' + game_data.icon + '.png'):
-        game_image.set_from_file(config['Icons']['Icon set root'] + '/64x64/apps/' + game_data.icon + '.png')
+    if game_data['icon'] is not None and os.path.isfile(config['Icons']['Icon set root'] + '/64x64/apps/' + game_data['icon'] + '.png'):
+        game_image.set_from_file(config['Icons']['Icon set root'] + '/64x64/apps/' + game_data['icon'] + '.png')
     game_dialog.set_image(game_image)
 
     return game_dialog
@@ -184,20 +180,17 @@ def get_game_dialog(game_data, config, message):
 def init_launcher(descriptor, config):
     game_properties = descriptor['Game']
 
-    game_data = Struct()
-
     if game_properties.get('Platform') is None or len(game_properties['Platform']) == 0:
         print('The \'Platform\' property is required.')
         sys.exit(1)
-    game_data.platform = game_properties['Platform']
 
     launcher_name = None
     launcher_params = None
     if game_properties.get('Launcher') is not None and len(game_properties['Launcher']) > 0:
         launcher_name, *launcher_params = [p.strip() for p in game_properties['Launcher'].split(',')]
-    launcher = game_launcher.get_implementation(game_data.platform, launcher_name)
+    launcher = game_launcher.get_implementation(game_properties['Platform'], launcher_name)
 
-    launcher.game_data = game_data
+    launcher.game_data = {'platform': game_properties['Platform']}
     launcher.launcher_params = launcher_params
     # TODO Decide what to call config: config / launcher_config / ?...
     launcher.launcher_config = config
@@ -208,14 +201,14 @@ def init_launcher(descriptor, config):
     launcher.set_target(game_properties)
     launcher.set_working_dir(game_properties)
 
-    set_id(game_data, game_properties)
-    set_optical_disk(game_data, game_properties)
-    set_resolution(game_data, game_properties)
+    set_id(launcher.game_data, game_properties)
+    set_optical_disk(launcher.game_data, game_properties)
+    set_resolution(launcher.game_data, game_properties)
 
     launcher.set_launcher_data(descriptor)
 
     # TODO move set_game_menu_data(...)
-    set_game_menu_data(game_data, game_properties)
+    set_game_menu_data(launcher.game_data, game_properties)
 
     return launcher
 
@@ -242,70 +235,68 @@ def launch_game(id):
     check_optical_disk(launcher.game_data, config, game_descriptor['Game'])
 
     activate_input_mappers(used_mappers)
-    configure_env(launcher.game_data)
-    launcher.configure_env()
+    configure_env(launcher)
 
     # TODO: Figure out what to do with the line below
-    launcher.game_data.platform_config = config['General']['Platform Config']
+    launcher.game_data['platform_config'] = config['General']['Platform Config']
 
     launcher.launch_game()
 
-    launcher.revert_env()
+    revert_env(launcher)
     deactivate_input_mappers(used_mappers)
-    revert_env(launcher.game_data)
 
 
-def revert_env(game_data):
-    pass
+def revert_env(launcher):
+    launcher.revert_env()
     display_handler.get_implementation().restore_resolution()
 
 
 def set_game_menu_data(game_data, game_properties):
-    game_data.title = game_properties['Title']
+    game_data['title'] = game_properties['Title']
 
     # TODO add check for genres
-    game_data.genre = game_properties['Genre']
+    game_data['genre'] = game_properties['Genre']
 
-    game_data.developer = game_properties['Developer']
+    game_data['developer'] = game_properties['Developer']
 
     if game_properties.get('Specialization') is None:
-        game_data.specialization = None
+        game_data['specialization'] = None
     else:
-        game_data.specialization = game_properties['Specialization']
+        game_data['specialization'] = game_properties['Specialization']
 
     if game_properties.get('Included') is None:
-        game_data.included = None
+        game_data['included'] = None
     else:
         game_properties.included = game_properties['Included']
 
     if game_properties.get('Icon') is None:
-        if game_data.id is not None:
-            game_data.icon = game_data.id
+        if game_data['id'] is not None:
+            game_data['icon'] = game_data['id']
         else:
-            game_data.icon = None
+            game_data['icon'] = None
     else:
-        game_data.icon = game_properties['Icon']
+        game_data['icon'] = game_properties['Icon']
 
 
 def set_id(game_data, game_properties):
     if game_properties.get('ID') is None:
-        game_data.id = None
+        game_data['id'] = None
     else:
-        game_data.id = game_properties['ID']
+        game_data['id'] = game_properties['ID']
 
 
 def set_optical_disk(game_data, game_properties):
     if game_properties.get('Optical Disk') is None:
-        game_data.optical_disk = None
+        game_data['optical_disk'] = None
     else:
-        game_data.optical_disk = game_properties['Optical Disk']
+        game_data['optical_disk'] = game_properties['Optical Disk']
 
 
 def set_resolution(game_data, game_properties):
     if game_properties.get('Resolution') is None:
-        game_data.resolution = None
+        game_data['resolution'] = None
     else:
-        game_data.resolution = game_properties['Resolution']
+        game_data['resolution'] = game_properties['Resolution']
 
 
 def get_used_mappers(control_properties):
@@ -358,10 +349,11 @@ def group_input_mappings(control_properties):
                 if input_mapping_groups.get(mapping_type) is None:
                     input_mapping_groups[mapping_type] = []
 
-                mapping = Struct()
-                mapping.virtual = virtual_trigger
-                mapping.physical = physical_trigger
-                mapping.description = description
+                mapping = {
+                    'virtual': virtual_trigger,
+                    'physical': physical_trigger,
+                    'description': description
+                }
 
                 input_mapping_groups[mapping_type].append(mapping)
 

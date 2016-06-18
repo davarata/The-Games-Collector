@@ -20,7 +20,7 @@ class RetroArchMapper(InputMapper):
         axis_key = 'input_player{0}_{1}_axis'
 
         for mapping in self.input_mappings:
-            trigger_id, trigger_type = mapping.physical.split(' ')
+            trigger_id, trigger_type = mapping['physical'].split(' ')
             trigger_type = trigger_type[1:-1]
 
             key = 'nul'
@@ -35,9 +35,9 @@ class RetroArchMapper(InputMapper):
                 key = trigger_id
 
             # TODO Add support for two players.
-            launch_config[key_key.format('1', mapping.virtual)] = '"' + key + '"'
-            launch_config[button_key.format('1', mapping.virtual)] = '"' + button + '"'
-            launch_config[axis_key.format('1', mapping.virtual)] = '"' + axis + '"'
+            launch_config[key_key.format('1', mapping['virtual'])] = '"' + key + '"'
+            launch_config[button_key.format('1', mapping['virtual'])] = '"' + button + '"'
+            launch_config[axis_key.format('1', mapping['virtual'])] = '"' + axis + '"'
 
         mappings_file = open('/tmp/retroarch-mappings.cfg', 'w')
         for key in sorted(launch_config.keys()):

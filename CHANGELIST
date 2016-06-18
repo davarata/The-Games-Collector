@@ -1,6 +1,32 @@
-Commit [?]
+------------------------------------------------------------------------------------------------------------------------
+ Commit ID:
+------------------------------------------------------------------------------------------------------------------------
 
-The main focus in this version was to add plug-in support.
+ The main focus of this commit was to remove all the Struct classes and replace them with dictionaries.
+
+Overall
+-------
+ - Replaced all Struct classes with dictionaries.
+
+ - Removed unused imports, did some minor refactoring and fixed some indentation.
+
+ - - - - -
+
+
+Individual components
+---------------------
+ - Two changes where made to the display handler files:
+    * The DisplayHandler class (display_handler.py) was missing the 'parameters' parameter.
+    * Delays where added to the Xrandr implementation (xrandr_display_handler.py) just to get it to work correctly.
+      After getting the code to work corretly (done in the previous commit), I found that I could reduce the delay
+      while still getting the desired results.
+
+
+------------------------------------------------------------------------------------------------------------------------
+ Commit ID: ae6e07a8b08b0d7598800d40cbbd1a51f6c497a5
+------------------------------------------------------------------------------------------------------------------------
+
+The main focus in this commit was to add plug-in support.
 
 Overall
 -------
@@ -102,7 +128,7 @@ Individual components
 Backwards compatibility
 -----------------------
 
-THIS VERSION IS NOT BACKWARDS COMPATIBLE
+THE CHANGES MADE TO THIS COMMIT IS NOT BACKWARDS COMPATIBLE
 
  - The resolution property in the game descriptor file can now take two values as well as non-resolution values (like
    'current' and 'off'). This will break previous versions of the game launcher.

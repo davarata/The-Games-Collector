@@ -7,10 +7,10 @@ from plugins.launchers.game_launcher import GameLauncher
 class LinuxLauncher(GameLauncher):
 
     def launch_game(self):
-        if self.game_data.executable_type == 'script':
-            subprocess.Popen(['sh', self.game_data.target]).wait()
+        if self.game_data['executable_type'] == 'script':
+            subprocess.Popen(['sh', self.game_data['target']]).wait()
         else:
-            subprocess.Popen([self.game_data.target]).wait()
+            subprocess.Popen([self.game_data['target']]).wait()
 
     def set_launcher_data(self, descriptor):
         if self.launcher_params is None or len(self.launcher_params) == 0:
@@ -32,7 +32,7 @@ class LinuxLauncher(GameLauncher):
             print('Unknown target type: ' + type_param[1])
             sys.exit(1)
 
-        self.game_data.executable_type = 'script'
+        self.game_data['executable_type'] = 'script'
 
     name = 'Linux'
     supported_implementations = {'Linux'}

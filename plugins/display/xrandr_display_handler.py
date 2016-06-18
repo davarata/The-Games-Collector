@@ -51,7 +51,7 @@ class XrandrDisplayHandler(DisplayHandler):
         xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(outputs)
         print(xrandr_cmd)
         subprocess.Popen(xrandr_cmd.split(' ')).wait()
-        time.sleep(10)
+        time.sleep(2)
 
     def save_resolution(self):
         self.saved_outputs = self.get_display_outputs()

@@ -27,7 +27,7 @@ class AntiMicroMapper(InputMapper):
 
         sets = {}
         for mapping in self.input_mappings:
-            parameters = mapping.physical.split(',')
+            parameters = mapping['physical'].split(',')
             trigger_value = parameters[0]
             trigger_type = parameters[1]
             if len(parameters) == 3:
@@ -44,8 +44,12 @@ class AntiMicroMapper(InputMapper):
             if sets.get(set_id) is None:
                 sets[set_id] = []
 
-            sets[set_id].append('<!-- ' + mapping.description + ' -->' + os.linesep +
-                entry_xml.format(trigger_type, trigger_value, mapping.virtual))
+            sets[set_id].append(
+                '<!-- ' +
+                mapping['description'] +
+                ' -->' +
+                os.linesep +
+                entry_xml.format(trigger_type, trigger_value, mapping['virtual']))
 
         mappings_file = open('/tmp/antimicro.gamecontroller.amgp', 'w')
         mappings_file.write('<?xml version="1.0" encoding="UTF-8"?>' + os.linesep)
