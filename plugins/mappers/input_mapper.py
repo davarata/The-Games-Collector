@@ -1,3 +1,4 @@
+import utils
 from plugins.plugin_handler import Plugin
 
 
@@ -13,8 +14,8 @@ class InputMapper(Plugin):
         self.input_mappings = []
         for mapping in mappings:
             translated_mapping = {
-                'virtual': self.definitions['Virtual Devices'][mapping['virtual']],
-                'physical': self.definitions['Physical Devices'][mapping['physical']]
+                'virtual': self.get_definitions()['Virtual Devices'][mapping['virtual']],
+                'physical': self.get_definitions()['Physical Devices'][mapping['physical']]
             }
 
             if mapping['description'] is None:
@@ -23,6 +24,12 @@ class InputMapper(Plugin):
                 translated_mapping['description'] = mapping['description']
 
             self.input_mappings.append(translated_mapping)
+
+    def get_definitions(self):
+        if self.definitions is None:
+            self.definitions = utils.load_config(self.name, extension='mapper', skip_user_dirs=True, must_exist=True)
+
+        return self.definitions
 
     def activate(self):
         pass

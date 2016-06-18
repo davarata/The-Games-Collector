@@ -2,6 +2,34 @@
  Commit ID:
 ------------------------------------------------------------------------------------------------------------------------
 
+ This commit contains changes to how configuration files are loaded and values retrieved from them.
+
+Overall
+-------
+ - Updated the code to use some of the new configuration methods.
+
+ - Removed some duplicate code in some of the input mapper implementations.
+
+ - - - - -
+
+
+Individual components
+---------------------
+ - Changes have been made to the utility python script (utils.py) to remove some duplicate code when loading
+   configuration files. One method is unused and will be used in the next update (by the DOSBox input mapper).
+
+ - New methods have been added to the Plugin class (plugin_handler.py) to make it easier to get configuration.
+
+ NOTE: These changes will probably in the not too distant future be merged into a new Configuration class that will
+       handle all of the configuration.
+
+ - Two of the launchers will still using an incorrect config file to hold their configuration values. This has been
+   fixed.
+
+------------------------------------------------------------------------------------------------------------------------
+ Commit ID: b9ac5b58b834d274c3ecbb617b1458f78196df15
+------------------------------------------------------------------------------------------------------------------------
+
  The main focus of this commit was to remove all the Struct classes and replace them with dictionaries.
 
 Overall
@@ -18,7 +46,7 @@ Individual components
  - Two changes where made to the display handler files:
     * The DisplayHandler class (display_handler.py) was missing the 'parameters' parameter.
     * Delays where added to the Xrandr implementation (xrandr_display_handler.py) just to get it to work correctly.
-      After getting the code to work corretly (done in the previous commit), I found that I could reduce the delay
+      After getting the code to work correctly (done in the previous commit), I found that I could reduce the delay
       while still getting the desired results.
 
 

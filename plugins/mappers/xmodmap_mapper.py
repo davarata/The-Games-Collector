@@ -1,17 +1,10 @@
-import configparser
 import os
 import subprocess
 
-import utils
 from plugins.mappers.input_mapper import InputMapper
 
 
 class XmodmapMapper(InputMapper):
-
-    def __init__(self):
-        definitions_file = utils.get_config_file('Xmodmap.mapper')
-        self.definitions = configparser.ConfigParser()
-        self.definitions.read(definitions_file)
 
     def activate(self):
         output = subprocess.check_output(['xmodmap', '-pke'], universal_newlines=True)

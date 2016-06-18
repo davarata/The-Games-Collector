@@ -1,17 +1,10 @@
-import configparser
 import os
 import subprocess
 
-import utils
 from plugins.mappers.input_mapper import InputMapper
 
 
 class AntiMicroMapper(InputMapper):
-
-    def __init__(self):
-        definitions_file = utils.get_config_file('antimicro.mapper')
-        self.definitions = configparser.ConfigParser()
-        self.definitions.read(definitions_file)
 
     def activate(self):
         # button, trigger, stickbutton, dpadbutton

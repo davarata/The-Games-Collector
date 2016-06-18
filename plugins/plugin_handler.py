@@ -1,4 +1,3 @@
-import configparser
 import importlib
 import inspect
 import os
@@ -12,6 +11,10 @@ class Plugin:
 
     def load_plugins(self, package_name, base_class):
         if not inspect.isclass(base_class):
+            # TODO throw an error
+            return
+
+        if self.name is not None:
             # TODO throw an error
             return
 
@@ -47,13 +50,12 @@ class Plugin:
 
         if feature is not None:
             feature = feature.lower()
-            plugin_config_file = utils.get_config_file(self.base_class.__name__ + '.cfg')
-            if plugin_config_file is not None:
-                plugin_config = configparser.ConfigParser()
-                plugin_config.read(plugin_config_file)
-
-                if plugin_config.has_section('Defaults') and plugin_config['Defaults'].get(feature) is not None:
-                    name = plugin_config['Defaults'].get(feature)
+            # TODO try to get this changed to:
+            # TODO self.get_config_value(feature) or self.get_config_value('Defaults.' + feature)
+            config = self.get_config()
+            if config is not None:
+                if config.has_section('Defaults') and config['Defaults'].get(feature) is not None:
+                    name = config['Defaults'].get(feature)
                     for implementation in self.implementations:
                         if implementation.name == name:
                             return implementation
@@ -64,9 +66,37 @@ class Plugin:
 
         return self.implementations[0]
 
+    def get_config_value(self, key, required=False):
+        self.get_config()
+
+        if self.config is not None:
+            # TODO try getting rid of the General bit. Some config files should be treated as normal property files.
+            # TODO an alternative is to try and iterate through each section and see if the key is found in it
+            if self.config.has_section('General') and self.config['General'].get(key) is not None:
+                return self.config['General'][key]
+            else:
+                if required:
+                    print('The property ' + key + ' was not found in the ' + self.get_config_file_name() +
+                          ' configuration file.')
+        else:
+            if required:
+                print('The ' + self.get_config_file_name() + ' configuration file was not found.')
+
+    def get_config(self):
+        self.config = utils.load_config(self.get_config_file_name(), 'cfg')
+
+        return self.config
+
+    def get_config_file_name(self):
+        if self.name is not None:
+            return self.name
+        else:
+            return self.__class__.__name__
+
     install_dir = None
     name = None
     base_class = None
     implementations = None
     # TODO consider changing name
     supported_implementations = None
+    config = None

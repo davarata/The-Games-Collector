@@ -38,8 +38,7 @@ def add_game(game_desc_file, icon_file):
     game_descriptor.set('Game', 'ID', game_desc_file[game_desc_file.rfind('/') + 1: len(game_desc_file) - 5])
 
     # TODO Consider moving this somewhere else so that it will only be done once
-    config = configparser.ConfigParser()
-    config.read(utils.get_config_file('game-launcher.cfg'))
+    config = utils.load_config('game-launcher', skip_inst_dir=True)
 
     launcher = init_launcher(game_descriptor, config)
 
@@ -214,18 +213,17 @@ def init_launcher(descriptor, config):
 
 
 def launch_game(id):
-    game_descriptor = configparser.ConfigParser(strict=False)
     if not os.path.isfile(os.environ.get('HOME') + '/.config/application-launcher/' + id + '.game'):
         print('Game ' + id + ' not found.')
         sys.exit(1)
 
-    game_descriptor.read(os.environ.get('HOME') + '/.config/application-launcher/' + id + '.game')
+    game_descriptor = utils.load_config(id, extension='game', skip_inst_dir=True)
     # TODO Reconsider adding the ID here. Don't like it.
     game_descriptor.set('Game', 'ID', id)
 
     # TODO Consider moving this somewhere else so that it will only be done once
-    config = configparser.ConfigParser()
-    config.read(utils.get_config_file('game-launcher.cfg'))
+    # TODO this config file contains launcher specific config...
+    config = utils.load_config('game-launcher', skip_inst_dir=True)
 
     used_mappers = None
     if game_descriptor.has_section('Controls'):
@@ -237,8 +235,8 @@ def launch_game(id):
     activate_input_mappers(used_mappers)
     configure_env(launcher)
 
-    # TODO: Figure out what to do with the line below
-    launcher.game_data['platform_config'] = config['General']['Platform Config']
+    # # TODO: Figure out what to do with the line below
+    # launcher.game_data['platform_config'] = config['General']['Platform Config']
 
     launcher.launch_game()
 
@@ -394,10 +392,8 @@ def get_mapping_token(string, separators):
 
 
 def validate_all():
-    config = configparser.ConfigParser()
+    config = utils.load_config('game-launcher', skip_inst_dir=True)
     # TODO remove hard-coded config locations
-    config.read(utils.get_config_file('game-launcher.cfg'))
-
     files = glob.glob(os.environ.get('HOME') + '/.config/application-launcher/*.game')
     for file in files:
         game_descriptor = configparser.ConfigParser(strict=False)

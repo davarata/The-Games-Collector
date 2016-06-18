@@ -43,8 +43,9 @@ class DOSBoxLauncher(GameLauncher):
         if game_properties.get('SoundFont') is None:
             self.game_data['soundfont'] = None
         else:
-            self.game_data['soundfont'] = os.path.join(self.launcher_config['DOS']['SoundFont Location'],
-                                                    game_properties['SoundFont'] + '.sf2')
+            self.game_data['soundfont'] = os.path.join(self.get_config_value('SoundFont Location', True),
+                                                       game_properties['SoundFont'] + '.sf2')
+
             if not os.path.isfile(self.game_data['soundfont']):
                 print('The sound font could not be found.')
                 sys.exit(1)
@@ -53,5 +54,14 @@ class DOSBoxLauncher(GameLauncher):
     timidity = None
     supported_implementations = {'DOS'}
     required_properties = {'developer', 'game root', 'genre', 'platform', 'target', 'title'}
-    optional_properties = {'disk image', 'icon', 'id', 'included', 'launcher', 'optical disk', 'resolution',
-                           'soundfont', 'specialization'}
+    optional_properties = {
+        'disk image',
+        'icon',
+        'id',
+        'included',
+        'launcher',
+        'optical disk',
+        'resolution',
+        'soundfont',
+        'specialization'
+    }

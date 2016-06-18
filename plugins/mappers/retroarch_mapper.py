@@ -1,16 +1,9 @@
-import configparser
 import os
 
-import utils
 from plugins.mappers.input_mapper import InputMapper
 
 
 class RetroArchMapper(InputMapper):
-
-    def __init__(self):
-        definitions_file = utils.get_config_file('RetroArch.mapper')
-        self.definitions = configparser.ConfigParser()
-        self.definitions.read(definitions_file)
 
     def activate(self):
         launch_config = {}

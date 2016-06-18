@@ -19,19 +19,17 @@ class RetroArchLauncher(GameLauncher):
             return super(RetroArchLauncher, self).get_platform_description()
 
     def launch_game(self):
-        platform_config = os.path.join(self.game_data['platform_config'], self.game_data['platform'] + '.cfg')
-        if os.path.isfile(platform_config):
-            with open(platform_config) as f:
-                for line in f:
-                    conf_entry = self.replace_tokens(line).split('=')
-                    if len(conf_entry) > 1:
-                        self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
+        config = self.get_config()
+        if config is not None and config.has_section(self.game_data['platform']):
+            platform_config = config[self.game_data['platform']]
+            for key in platform_config:
+                self.launch_config[key] = self.replace_tokens(platform_config[key])
 
         game_config = self.game_data['target'][:self.game_data['target'].rfind('.')] + '.cfg'
         if os.path.isfile(game_config):
             with open(game_config) as f:
                 for line in f:
-                    conf_entry = self.replace_tokens(line).split('=')
+                    conf_entry = line.split('=')
                     if len(conf_entry) > 1:
                         self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
 
@@ -39,7 +37,7 @@ class RetroArchLauncher(GameLauncher):
         if os.path.isfile(mapping_config):
             with open(mapping_config) as f:
                 for line in f:
-                    conf_entry = self.replace_tokens(line).split('=')
+                    conf_entry = line.split('=')
                     if len(conf_entry) > 1:
                         self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
 
@@ -59,17 +57,12 @@ class RetroArchLauncher(GameLauncher):
         subprocess.Popen(parameters, cwd=self.game_data['working_dir']).wait()
 
     # TODO rename this method
-    def replace_tokens(self, line):
-        if line.strip().startswith('#'):
-            modified_line = line.partition(' ')[2].strip()
-            if modified_line.startswith('@game-launcher[\'') and modified_line.endswith('\']'):
-                modified_line = modified_line[16:-2]
-                modified_line = modified_line.replace('${game_root}', '"' + self.game_data['game_root'] + '"')
-                return modified_line + '\n'
-            else:
-                return line
-        else:
-            return line
+    def replace_tokens(self, value):
+        value = value.strip()
+        if value.startswith('${') and value.endswith('}') and self.game_data.get(value[2:-1]) is not None:
+            return self.game_data.get(value[2:-1])
+
+        return value
 
     def configure_env(self):
         if self.game_data['platform'] == 'Arcade':
@@ -91,7 +84,7 @@ class RetroArchLauncher(GameLauncher):
         if self.game_data['core'] not in self.retroarch_cores.values():
             print('Unknown core: ' + self.game_data['core'])
 
-        self.game_data['core'] = os.path.join(self.launcher_config['RetroArch']['Cores Location'],
+        self.game_data['core'] = os.path.join(self.get_config_value('Cores Location', True),
                                               self.game_data['core'] + '.so')
 
     name = 'RetroArch'
