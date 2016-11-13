@@ -1,0 +1,228 @@
+[Virtual Devices]
+Keyboard.Escape = key_esc
+
+Keyboard.F1 = key_f1
+Keyboard.F2 = key_f2
+Keyboard.F3 = key_f3
+Keyboard.F4 = key_f4
+Keyboard.F5 = key_f5
+Keyboard.F6 = key_f6
+Keyboard.F7 = key_f7
+Keyboard.F8 = key_f8
+Keyboard.F9 = key_f9
+Keyboard.F10 = key_f10
+Keyboard.F11 = key_f11
+Keyboard.F12 = key_f12
+
+Keyboard.PrintScreen = key_printscreen
+Keyboard.ScrollLock = key_scrolllock
+Keyboard.Pause = key_pause
+
+Keyboard.Grave = key_grave
+Keyboard.1 = key_1
+Keyboard.2 = key_2
+Keyboard.3 = key_3
+Keyboard.4 = key_4
+Keyboard.5 = key_5
+Keyboard.6 = key_6
+Keyboard.7 = key_7
+Keyboard.8 = key_8
+Keyboard.9 = key_9
+Keyboard.0 = key_0
+Keyboard.Minus = key_minus
+Keyboard.Equals = key_equals
+Keyboard.Backspace = key_bspace
+
+Keyboard.Tab = key_tab
+Keyboard.Q = key_q
+Keyboard.W = key_w
+Keyboard.E = key_e
+Keyboard.R = key_r
+Keyboard.T = key_t
+Keyboard.Y = key_y
+Keyboard.U = key_u
+Keyboard.I = key_i
+Keyboard.O = key_o
+Keyboard.P = key_p
+Keyboard.LeftBracket = key_lbracket
+Keyboard.RightBracket = key_rbracket
+Keyboard.BackSlash = key_backslash
+
+Keyboard.CapsLock = key_capslock
+Keyboard.A = key_a
+Keyboard.S = key_s
+Keyboard.D = key_d
+Keyboard.F = key_f
+Keyboard.G = key_g
+Keyboard.H = key_h
+Keyboard.J = key_j
+Keyboard.K = key_k
+Keyboard.L = key_l
+Keyboard.SemiColon = key_semicolon
+Keyboard.Quote = key_quote
+Keyboard.Enter = key_enter
+
+Keyboard.LeftShift = key_lshift
+Keyboard.LessThan = key_lessthan
+Keyboard.Z = key_z
+Keyboard.X = key_x
+Keyboard.C = key_c
+Keyboard.V = key_v
+Keyboard.B = key_b
+Keyboard.N = key_n
+Keyboard.M = key_m
+Keyboard.Comma = key_comma
+Keyboard.Period = key_period
+Keyboard.FrontSlash = key_slash
+Keyboard.RightShift = key_rshift
+
+Keyboard.LeftControl = key_lctrl
+Keyboard.LeftAlt = key_lalt
+Keyboard.Space = key_space
+Keyboard.RightAlt = key_ralt
+Keyboard.RightControl = key_rctrl
+
+Keyboard.Insert = key_insert
+Keyboard.Home = key_home
+Keyboard.PageUp = key_pageup
+Keyboard.Delete = key_delete
+Keyboard.End = key_end
+Keyboard.PageDown = key_pagedown
+
+Keyboard.Up = key_up
+Keyboard.Left = key_left
+Keyboard.Down = key_down
+Keyboard.Right = key_right
+
+Keyboard.NumLock = key_numlock
+Keyboard.KeyPadDivide = key_kp_divide
+Keyboard.KeyPadMultiply = key_kp_multiply
+Keyboard.KeyPadMinus = key_kp_minus
+Keyboard.KeyPad7 = key_kp_7
+Keyboard.KeyPad8 = key_kp_8
+Keyboard.KeyPad9 = key_kp_9
+Keyboard.KeyPadPlus = key_kp_plus
+Keyboard.KeyPad4 = key_kp_4
+Keyboard.KeyPad5 = key_kp_5
+Keyboard.KeyPad6 = key_kp_6
+Keyboard.KeyPad1 = key_kp_1
+Keyboard.KeyPad2 = key_kp_2
+Keyboard.KeyPad3 = key_kp_3
+Keyboard.KeyPadEnter = key_kp_enter
+Keyboard.KeyPad0 = key_kp_0
+Keyboard.KeyPadPeriod = key_kp_period
+
+[Physical Devices]
+Keyboard.Escape = 27
+
+Keyboard.F1 = 282
+Keyboard.F2 = 283
+Keyboard.F3 = 284
+Keyboard.F4 = 285
+Keyboard.F5 = 286
+Keyboard.F6 = 287
+Keyboard.F7 = 288
+Keyboard.F8 = 289
+Keyboard.F9 = 290
+Keyboard.F10 = 291
+Keyboard.F11 = 292
+Keyboard.F12 = 293
+
+Keyboard.PrintScreen = 316
+Keyboard.ScrollLock = 302
+Keyboard.Pause = 19
+
+Keyboard.Grave = 96
+Keyboard.1 = 49
+Keyboard.2 = 50
+Keyboard.3 = 51
+Keyboard.4 = 52
+Keyboard.5 = 53
+Keyboard.6 = 54
+Keyboard.7 = 55
+Keyboard.8 = 56
+Keyboard.9 =  57
+Keyboard.0 = 48
+Keyboard.Minus = 45
+Keyboard.Equals = 61
+Keyboard.Backspace = 8
+
+Keyboard.Tab = 9
+Keyboard.Q = 113
+Keyboard.W = 119
+Keyboard.E = 101
+Keyboard.R = 114
+Keyboard.T = 116
+Keyboard.Y = 121
+Keyboard.U = 117
+Keyboard.I = 105
+Keyboard.O = 111
+Keyboard.P = 112
+Keyboard.LeftBracket = 91
+Keyboard.RightBracket = 93
+Keyboard.BackSlash = 92
+
+Keyboard.CapsLock = 301
+Keyboard.A = 97
+Keyboard.S = 115
+Keyboard.D = 100
+Keyboard.F = 102
+Keyboard.G = 103
+Keyboard.H = 104
+Keyboard.J = 106
+Keyboard.K = k107
+Keyboard.L = 108
+Keyboard.SemiColon = 59
+Keyboard.Quote = 39
+Keyboard.Enter = 13
+
+Keyboard.LeftShift = 304
+Keyboard.LessThan = 60
+Keyboard.Z = 122
+Keyboard.X = 120
+Keyboard.C = 99
+Keyboard.V = 118
+Keyboard.B = 98
+Keyboard.N = 110
+Keyboard.M = 109
+Keyboard.Comma = 44
+Keyboard.Period = 46
+Keyboard.FrontSlash = 47
+Keyboard.RightShift = 303
+
+Keyboard.LeftControl = 306
+Keyboard.LeftAlt = 308
+Keyboard.Space = 32
+Keyboard.RightAlt = 307
+Keyboard.RightControl = 305
+
+Keyboard.Insert = 277
+Keyboard.Home = 278
+Keyboard.PageUp = 280
+Keyboard.Delete = 127
+Keyboard.End = 279
+Keyboard.PageDown = 281
+
+Keyboard.Up = 273
+Keyboard.Left = 276
+Keyboard.Down = 274
+Keyboard.Right = 275
+
+Keyboard.NumLock = 300
+Keyboard.KeyPadDivide = 267
+Keyboard.KeyPadMultiply = 268
+Keyboard.KeyPadMinus = 269
+Keyboard.KeyPad7 = 263
+Keyboard.KeyPad8 = 264
+Keyboard.KeyPad9 = 265
+Keyboard.KeyPadPlus = 270
+Keyboard.KeyPad4 = 260
+Keyboard.KeyPad5 = 261
+Keyboard.KeyPad6 = 262
+Keyboard.KeyPad1 = 257
+Keyboard.KeyPad2 = 258
+Keyboard.KeyPad3 = 259
+Keyboard.KeyPadEnter = 271
+Keyboard.KeyPad0 = 256
+Keyboard.KeyPadPeriod = 266
+
