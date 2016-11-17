@@ -1,48 +1,116 @@
 [Virtual Devices]
-Keyboard.Tilde = 0x60
-Keyboard.Comma = 0x2c
-Keyboard.Period = 0x2e
-
-Keyboard.A = 0x41
-Keyboard.D = 0x44
-Keyboard.E = 0x45
-Keyboard.F = 0x46
-Keyboard.Q = 0x51
-Keyboard.R = 0x52
-Keyboard.S = 0x53
-Keyboard.W = 0x57
-
-Keyboard.Space = 0x20
-
-Keyboard.OpenBlockBracket = 0x5b
-Keyboard.CloseBlockBracket = 0x5d
-
-Keyboard.Up = 0x1000013
-Keyboard.Down = 0x1000015
-Keyboard.Left = 0x1000012
-Keyboard.Right = 0x1000014
-
-Keyboard.Numpad0 = 0x11000006
-Keyboard.Numpad1 = 0x11000011
-Keyboard.Numpad2 = 0x11000015
-Keyboard.Numpad3 = 0x11000016
-Keyboard.Numpad4 = 0x11000012
-Keyboard.Numpad5 = 0x1100000b
-Keyboard.Numpad6 = 0x11000014
-Keyboard.Numpad7 = 0x11000010
-Keyboard.Numpad8 = 0x11000013
-Keyboard.Numpad9 = 0x11000017
-Keyboard.NumpadEnter = 0x1000005
-
-Keyboard.Enter = 0x1000004
 Keyboard.Escape = 0x1000000
-Keyboard.LeftAlt = 0x1000023
-Keyboard.LeftControl = 0x1000021
-Keyboard.RightShift = 0x11000020
 
 Keyboard.F1 = 0x1000030
+Keyboard.F2 = 0x1000031
+Keyboard.F3 = 0x1000032
+Keyboard.F4 = 0x1000033
+Keyboard.F5 = 0x1000034
+Keyboard.F6 = 0x1000035
+Keyboard.F7 = 0x1000036
+Keyboard.F8 = 0x1000037
+Keyboard.F9 = 0x1000038
 Keyboard.F10 = 0x1000039
+Keyboard.F11 = 0x100003a
+Keyboard.F12 = 0x100003b
 
+Keyboard.PrintScreen = 0x1000009
+Keyboard.ScrollLock = 0x1000026
+Keyboard.Pause = 0x1000008
+
+Keyboard.Grave = 0x60
+Keyboard.1 = 0x31
+Keyboard.2 = 0x32
+Keyboard.3 = 0x33
+Keyboard.4 = 0x34
+Keyboard.5 = 0x35
+Keyboard.6 = 0x36
+Keyboard.7 = 0x37
+Keyboard.8 = 0x38
+Keyboard.9 = 0x39
+Keyboard.0 = 0x30
+Keyboard.Minus = 0x2d
+Keyboard.Equals = 0x3d
+Keyboard.Backspace = 0x1000003
+
+Keyboard.Tab = 0x1000001
+Keyboard.Q = 0x51
+Keyboard.W = 0x57
+Keyboard.E = 0x45
+Keyboard.R = 0x52
+Keyboard.T = 0x54
+Keyboard.Y = 0x59
+Keyboard.U = 0x55
+Keyboard.I = 0x49
+Keyboard.O = 0x4f
+Keyboard.P = 0x50
+Keyboard.LeftBracket = 0x5b
+Keyboard.RightBracket = 0x5d
+Keyboard.BackSlash = 0x5c
+
+Keyboard.CapsLock = 0x1000024
+Keyboard.A = 0x41
+Keyboard.S = 0x53
+Keyboard.D = 0x44
+Keyboard.F = 0x46
+Keyboard.G = 0x47
+Keyboard.H = 0x48
+Keyboard.J = 0x4a
+Keyboard.K = 0x4b
+Keyboard.L = 0x4c
+Keyboard.SemiColon = 0x3b
+Keyboard.Quote = 0x27
+Keyboard.Enter = 0x1000004
+
+Keyboard.LeftShift = 0x1000020
+Keyboard.LessThan = #NOT_SUPPORTED#
+Keyboard.Z = 0x5a
+Keyboard.X = 0x58
+Keyboard.C = 0x43
+Keyboard.V = 0x56
+Keyboard.B = 0x42
+Keyboard.N = 0x4e
+Keyboard.M = 0x4d
+Keyboard.Comma = 0x2c
+Keyboard.Period = 0x2e
+Keyboard.FrontSlash = 0x2f
+Keyboard.RightShift = 0x11000020
+
+Keyboard.LeftControl = 0x1000021
+Keyboard.LeftAlt = 0x1000023
+Keyboard.Space = 0x20
+Keyboard.RightAlt = #NOT_SUPPORTED#
+Keyboard.RightControl = 0x11000021
+
+Keyboard.Insert = 0x1000006
+Keyboard.Home = 0x1000010
+Keyboard.PageUp = 0x1000016
+Keyboard.Delete = 0x1000007
+Keyboard.End = 0x1000011
+Keyboard.PageDown = 0x1000017
+
+Keyboard.Up = 0x1000013
+Keyboard.Left = 0x1000012
+Keyboard.Down = 0x1000015
+Keyboard.Right = 0x1000014
+
+Keyboard.NumLock = 0x1000025
+Keyboard.KeyPadDivide = 0x1000002f
+Keyboard.KeyPadMultiply = 0x1000002a
+Keyboard.KeyPadMinus = 0x1000002d
+Keyboard.KeyPad7 = 0x11000010
+Keyboard.KeyPad8 = 0x11000013
+Keyboard.KeyPad9 = 0x11000017
+Keyboard.KeyPadPlus = 0x1000002b
+Keyboard.KeyPad4 = 0x11000012
+Keyboard.KeyPad5 = 0x1100000b
+Keyboard.KeyPad6 = 0x11000014
+Keyboard.KeyPad1 = 0x11000011
+Keyboard.KeyPad2 = 0x11000015
+Keyboard.KeyPad3 = 0x11000016
+Keyboard.KeyPadEnter = 0x1000005
+Keyboard.KeyPad0 = 0x11000006
+Keyboard.KeyPadPeriod = 0x1000002e
 
 [Physical Devices]
 Xbox360.Up = 1,dpad

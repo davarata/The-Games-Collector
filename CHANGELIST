@@ -2,6 +2,78 @@
  Commit ID:
 ------------------------------------------------------------------------------------------------------------------------
 
+ The main focus of this commit was to add the DOSBox mapper.
+
+Overall
+-------
+ - Added the DOSBox mapper.
+
+ - Updated helper shell scripts.
+
+ - Created the config manager.
+
+ - - - - -
+
+
+Individual components
+---------------------
+ - Game add helper script (add-games.sh)
+   The game add helper script has been updated to enable a user to add a single game instead of all games in a
+   directory. This script is basically for y personal use since it depends on a specific directory structure.
+
+ - Game launcher script (game-launcher.sh)
+   The game launcher script has been updated to point to the new directory and python script. This script uses a hard-
+   coded location and is therefore also not quite ready for general use.
+
+ - Installation helper (install.sh)
+   An installation helper script (install.sh) has been added to add the script to handle some of the common tasks when
+   installing the games collector, such as linking the launcher script in /usr/local/bin and to create the icon
+   directories that are used. This script is not yet ready for general use.
+
+ - Game launcher (game-launcher.py)
+   Updated the game launcher plugin base class to use the new config manager.
+
+ - DOSBox mapper (dosbox_mapper.py, mapper-0.74.map)
+   Added a mapper for use with DOSBox, since mapping using Xmodmap does not appear to be working.
+
+ - Input mapper (input_mapper.py)
+   Updated the input mapper plugin base class to use the new config manager.
+
+ - Plugin (plugin_handler.py)
+    * Updated the plugin base class to use the new config manager.
+    * Saved the installation directory location to enable plugins (such as DOSBox) to use it.
+
+ - Config manager (utils.py/config_manager.py)
+   * Renamed uitls.py file to config_manager.py.
+   * Added the ConfigManager class, thus making this the config manager. The config manager is meant to handle all the
+     configuration used by the games collector and all its plugins. This removes unnecessary dependencies between the
+     components that initially loads the configuration and the components that at a later stage also requires the same
+     configuration. This is a singleton and should be accessed via the static get_instance() method.
+   * Added methods to add configuration to (set_config(...)) and retreive configuration from (get_config(...)) the
+     config manager.
+   * Added two methods that should aid with development: set_user_dir(...) and set_inst_dir(...). These methods allows
+     the default configuration locations to be overridden. Previously, live data needed to be used to test new changes
+     which made playing games difficult while also working on a newer version of The Games Collector - especially if
+     the newer version had changes that would break older versions. Updated the rest of the code to use this.
+
+ - The Games Collector (the-games-collector.py)
+    * Updated the games collector to use the new config manager.
+    * (BUGFIX) Updated the menu entry code to use the new 'play' parameter instead of the old 'launch' parameter when
+      creating a desktop file (menu file). This was never updated when the new parameter was originally introduced.
+    * Added support for specifying which mapper should be used for a specific mapping type. This was required since the
+      DOSBox and Xmodmap mappers perform mappings for the same mapping type and in some instances the wrong mapper
+      ended up being used.
+    * Added code to accept two new parameters (-c and -i) which is used to override the installation and configuration
+      locations.
+
+ - Mapping files (antimicro.mapper, DOSBox.mapper, RetroArch.mapper, Xmodmap.mapper)
+   Updated the existing mapping files with all the mappings for a keyboard and added DOSBox.mapper (wich also includes
+   all the mappings for a keyboard).
+
+------------------------------------------------------------------------------------------------------------------------
+ Commit ID: 7bfbc032d8a91aa0d744f560893603698c1320ee
+------------------------------------------------------------------------------------------------------------------------
+
  This commit contains changes to how configuration files are loaded and values retrieved from them.
 
 Overall

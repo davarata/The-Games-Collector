@@ -1,4 +1,3 @@
 #!/bin/bash
-
-python3 /usr/local/game-launcher/game-launcher.py $*
+python3 /usr/local/the-games-collector/the-games-collector.py $*
 

@@ -1,4 +1,4 @@
-import utils
+from config_manager import ConfigManager
 from plugins.plugin_handler import Plugin
 
 
@@ -27,7 +27,7 @@ class InputMapper(Plugin):
 
     def get_definitions(self):
         if self.definitions is None:
-            self.definitions = utils.load_config(self.name, extension='mapper', skip_user_dirs=True, must_exist=True)
+            self.definitions = ConfigManager.get_instance().load_config(self.name, extension='mapper', skip_user_dirs=True, must_exist=True)
 
         return self.definitions
 

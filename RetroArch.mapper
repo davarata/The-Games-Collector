@@ -78,6 +78,121 @@ SNES.L = l
 SNES.R = r
 
 [Physical Devices]
+# Keyboard #
+Keyboard.Escape = escape (key)
+
+Keyboard.F1 = f1 (key)
+Keyboard.F2 = f2 (key)
+Keyboard.F3 = f3 (key)
+Keyboard.F4 = f4 (key)
+Keyboard.F5 = f5 (key)
+Keyboard.F6 = f6 (key)
+Keyboard.F7 = f7 (key)
+Keyboard.F8 = f8 (key)
+Keyboard.F9 = f9 (key)
+Keyboard.F10 = f10 (key)
+Keyboard.F11 = f11 (key)
+Keyboard.F12 = f12 (key)
+
+Keyboard.PrintScreen = #NOT_SUPPORTED#
+Keyboard.ScrollLock = scroll_lock (key)
+Keyboard.Pause = pause (key)
+
+Keyboard.Grave = tilde (key)
+Keyboard.1 = num1 (key)
+Keyboard.2 = num2 (key)
+Keyboard.3 = num3 (key)
+Keyboard.4 = num4 (key)
+Keyboard.5 = num5 (key)
+Keyboard.6 = num6 (key)
+Keyboard.7 = num7 (key)
+Keyboard.8 = num8 (key)
+Keyboard.9 = num9 (key)
+Keyboard.0 = num0 (key)
+Keyboard.Minus = minus (key)
+Keyboard.Equals = equals (key)
+Keyboard.Backspace = backspace (key)
+
+Keyboard.Tab = tab (key)
+Keyboard.Q = q (key)
+Keyboard.W = w (key)
+Keyboard.E = e (key)
+Keyboard.R = r (key)
+Keyboard.T = t (key)
+Keyboard.Y = y (key)
+Keyboard.U = u (key)
+Keyboard.I = i (key)
+Keyboard.O = o (key)
+Keyboard.P = p (key)
+Keyboard.LeftBracket = leftbracket (key)
+Keyboard.RightBracket = rightbracket (key)
+Keyboard.BackSlash = backslash (key)
+
+Keyboard.CapsLock = capslock (key)
+Keyboard.A = a (key)
+Keyboard.S = s (key)
+Keyboard.D = d (key)
+Keyboard.F = f (key)
+Keyboard.G = g (key)
+Keyboard.H = h (key)
+Keyboard.J = j (key)
+Keyboard.K = k (key)
+Keyboard.L = l (key)
+Keyboard.SemiColon = semicolon (key)
+Keyboard.Quote = quote (key)
+Keyboard.Enter = enter (key)
+
+Keyboard.LeftShift = shift (key)
+Keyboard.LessThan = #NOT_SUPPORTED#
+Keyboard.Z = z (key)
+Keyboard.X = x (key)
+Keyboard.C = c (key)
+Keyboard.V = v (key)
+Keyboard.B = b (key)
+Keyboard.N = n (key)
+Keyboard.M = m (key)
+Keyboard.Comma = comma (key)
+Keyboard.Period = period (key)
+Keyboard.FrontSlash = slash (key)
+Keyboard.RightShift = rshift (key)
+
+Keyboard.LeftControl = ctrl (key)
+Keyboard.LeftAlt = alt (key)
+Keyboard.Space = space (key)
+Keyboard.RightAlt = #NOT_SUPPORTED#
+Keyboard.RightControl = rctrl (key)
+
+Keyboard.Insert = insert (key)
+Keyboard.Home = home (key)
+Keyboard.PageUp = pageup (key)
+Keyboard.Delete = del (key)
+Keyboard.End = key_end (key)
+Keyboard.PageDown = pagedown (key)
+
+Keyboard.Up = up (key)
+Keyboard.Left = left (key)
+Keyboard.Down = down (key)
+Keyboard.Right = right (key)
+
+Keyboard.NumLock = numlock (key)
+Keyboard.KeyPadDivide = divide (key)
+Keyboard.KeyPadMultiply = multiply (key)
+Keyboard.KeyPadMinus = subtract (key)
+Keyboard.KeyPad7 = #NOT_SUPPORTED#
+Keyboard.KeyPad8 = #NOT_SUPPORTED#
+Keyboard.KeyPad9 = #NOT_SUPPORTED#
+Keyboard.KeyPadPlus = add (key)
+Keyboard.KeyPad4 = #NOT_SUPPORTED#
+Keyboard.KeyPad5 = #NOT_SUPPORTED#
+Keyboard.KeyPad6 = #NOT_SUPPORTED#
+Keyboard.KeyPad1 = #NOT_SUPPORTED#
+Keyboard.KeyPad2 = #NOT_SUPPORTED#
+Keyboard.KeyPad3 = #NOT_SUPPORTED#
+Keyboard.KeyPadEnter = kp_enter (key)
+Keyboard.KeyPad0 = #NOT_SUPPORTED#
+Keyboard.KeyPadPeriod = #NOT_SUPPORTED#
+
+# Xbox 360 #
 Xbox360.Up = 13 (button)
 Xbox360.Down = 14 (button)
 Xbox360.Left = 11 (button)
@@ -103,6 +218,4 @@ Xbox360.RightAnalogUp = -4 (axis)
 Xbox360.RightAnalogDown = +4 (axis)
 Xbox360.RightAnalogLeft = -3 (axis)
 Xbox360.RightAnalogRight = +3 (axis)
-
-
 

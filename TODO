@@ -1,2 +1,5 @@
-Add version support to the launchers.
-
+- Allow RetroArch DOS games to use Optical disks
+- Add version support to the launchers (eg: wine 1.6, wine 1.8, ...)
+- Reverse the counter-intuitive input mappings.
+- Add requirements to the plugins. The DOSBox mapper requires the DOSBox launcher, Wine requires Linux...
+- Change the mappers to be able to interpret #NO_SUPPORTED#

@@ -8,7 +8,6 @@ import sys
 from gi.repository import Gtk
 
 import icon_creator
-import utils
 from plugins.display.display_handler import DisplayHandler
 from plugins.launchers.game_launcher import GameLauncher
 
@@ -19,6 +18,9 @@ from plugins.mappers.input_mapper import InputMapper
 
 # TODO Change: This needs to change to allow a custom icon (which might not be the same name as the
 # ID) to be added to the file installed
+from config_manager import ConfigManager
+
+
 def add_descriptor(game_desc_file):
     shutil.copyfile(game_desc_file,
                     os.environ.get('HOME') + '/.config/application-launcher/' + game_desc_file.rpartition('/')[2])
@@ -38,7 +40,7 @@ def add_game(game_desc_file, icon_file):
     game_descriptor.set('Game', 'ID', game_desc_file[game_desc_file.rfind('/') + 1: len(game_desc_file) - 5])
 
     # TODO Consider moving this somewhere else so that it will only be done once
-    config = utils.load_config('game-launcher', skip_inst_dir=True)
+    config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
 
     launcher = init_launcher(game_descriptor, config)
 
@@ -89,7 +91,7 @@ def add_menu_entry(launcher, game_properties):
         menu_entry.set('Desktop Entry', 'Icon', game_properties['Icon'])
     else:
         menu_entry.set('Desktop Entry', 'Icon', game_properties['ID'])
-    menu_entry.set('Desktop Entry', 'Exec', 'game-launcher launch ' + game_properties['ID'])
+    menu_entry.set('Desktop Entry', 'Exec', 'game-launcher play ' + game_properties['ID'])
     menu_entry.set('Desktop Entry', 'Terminal', 'false')
     menu_entry.set('Desktop Entry', 'Categories', 'Game;' + ';'.join(genres))
 
@@ -189,7 +191,7 @@ def init_launcher(descriptor, config):
         launcher_name, *launcher_params = [p.strip() for p in game_properties['Launcher'].split(',')]
     launcher = game_launcher.get_implementation(game_properties['Platform'], launcher_name)
 
-    launcher.game_data = {'platform': game_properties['Platform']}
+    launcher.game_data['platform'] = game_properties['Platform']
     launcher.launcher_params = launcher_params
     # TODO Decide what to call config: config / launcher_config / ?...
     launcher.launcher_config = config
@@ -217,18 +219,19 @@ def launch_game(id):
         print('Game ' + id + ' not found.')
         sys.exit(1)
 
-    game_descriptor = utils.load_config(id, extension='game', skip_inst_dir=True)
+    game_descriptor = ConfigManager.get_instance().load_config(id, extension='game', skip_inst_dir=True)
     # TODO Reconsider adding the ID here. Don't like it.
     game_descriptor.set('Game', 'ID', id)
 
     # TODO Consider moving this somewhere else so that it will only be done once
     # TODO this config file contains launcher specific config...
-    config = utils.load_config('game-launcher', skip_inst_dir=True)
+    config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
+
+    launcher = init_launcher(game_descriptor, config)
 
     used_mappers = None
     if game_descriptor.has_section('Controls'):
         used_mappers = get_used_mappers(game_descriptor['Controls'])
-    launcher = init_launcher(game_descriptor, config)
 
     check_optical_disk(launcher.game_data, config, game_descriptor['Game'])
 
@@ -303,16 +306,24 @@ def get_used_mappers(control_properties):
 
     for mapping_type in input_mapping_groups.keys():
         input_mappings = input_mapping_groups[mapping_type]
-        input_mapper_impl = input_mapper.get_implementation(mapping_type)
+        implementation = None
+        if mapping_type.find('=') > 0:
+            mapping_type, implementation = mapping_type.split('=')
+        input_mapper_impl = input_mapper.get_implementation(mapping_type, implementation)
         input_mapper_impl.set_mappings(input_mappings)
         used_mappers.append(input_mapper_impl)
 
     return used_mappers
 
 
+# Why not move this to input_mapper?
 def group_input_mappings(control_properties):
     input_mapping_groups = {}
+
     for virtual_trigger in control_properties:
+        if virtual_trigger.strip().startswith('mappers'):
+            continue
+
         virtual_device = virtual_trigger.split('.')[0].strip()
 
         virtual_trigger_mapping = control_properties[virtual_trigger]
@@ -355,6 +366,21 @@ def group_input_mappings(control_properties):
 
                 input_mapping_groups[mapping_type].append(mapping)
 
+    if control_properties.get('mappers') is not None:
+        mappers = {}
+        # not too happy with the name mapping
+        for mapping in control_properties['mappers'].split(','):
+            mapping_type, mapper = mapping.split('=')
+            mappers[mapping_type.strip().lower()] = mapper.strip()
+
+        tmp_input_mapping_groups = input_mapping_groups
+        input_mapping_groups = {}
+        for plain_mapping_type in tmp_input_mapping_groups.keys():
+            enhanced_mapping_type = plain_mapping_type
+            if mappers.get(plain_mapping_type) is not None:
+                enhanced_mapping_type += '=' + mappers[plain_mapping_type]
+            input_mapping_groups[enhanced_mapping_type] = tmp_input_mapping_groups[plain_mapping_type]
+
     return input_mapping_groups
 
 
@@ -392,7 +418,7 @@ def get_mapping_token(string, separators):
 
 
 def validate_all():
-    config = utils.load_config('game-launcher', skip_inst_dir=True)
+    config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
     # TODO remove hard-coded config locations
     files = glob.glob(os.environ.get('HOME') + '/.config/application-launcher/*.game')
     for file in files:
@@ -426,11 +452,20 @@ add_parser.add_argument('--icon')
 launch_parser = sub_parsers.add_parser('play')
 launch_parser.set_defaults(action='play')
 launch_parser.add_argument('id')
+launch_parser.add_argument('-c', '--config-location')
+launch_parser.add_argument('-i', '--installation-location')
 
 launch_parser = sub_parsers.add_parser('validate-all')
 launch_parser.set_defaults(action='validate-all')
+launch_parser.add_argument('-c', '--config-location')
+launch_parser.add_argument('-i', '--installation-location')
 
 args = parser.parse_args()
+
+if args.config_location is not None:
+    ConfigManager.get_instance().set_user_dir(args.config_location)
+if args.installation_location is not None:
+    ConfigManager.get_instance().set_inst_dir(args.installation_location)
 
 if args.action == 'add':
     add_game(args.descriptor, args.icon)

@@ -2,11 +2,12 @@ import importlib
 import inspect
 import os
 from pathlib import Path
-
-import utils
-
-
 # TODO allow plugin parameters to be checked (add a list of expected parameters than can be checked)
+# ?? above comment still valid?
+from config_manager import ConfigManager
+
+
+# TODO consider changing the name of the file to plugin.py
 class Plugin:
 
     def load_plugins(self, package_name, base_class):
@@ -38,6 +39,7 @@ class Plugin:
                         and issubclass(implementation, self.base_class) \
                         and name is not self.base_class.__name__:
                     instance = implementation()
+                    instance.install_dir = self.install_dir
                     if instance.supported_implementations is not None:
                         instance.supported_implementations = [s.lower() for s in instance.supported_implementations]
                     self.implementations.append(instance)
@@ -83,7 +85,7 @@ class Plugin:
                 print('The ' + self.get_config_file_name() + ' configuration file was not found.')
 
     def get_config(self):
-        self.config = utils.load_config(self.get_config_file_name(), 'cfg')
+        self.config = ConfigManager.get_instance().load_config(self.get_config_file_name(), 'cfg')
 
         return self.config
 

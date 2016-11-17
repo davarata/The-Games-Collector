@@ -3,6 +3,7 @@ import sys
 
 
 # TODO remove any methods that simply get or set data. simply use variables.
+from config_manager import ConfigManager
 from plugins.plugin_handler import Plugin
 
 
@@ -11,6 +12,7 @@ class GameLauncher(Plugin):
     def init(self, install_dir):
         self.install_dir = install_dir
         self.load_plugins('plugins.launchers', GameLauncher)
+        ConfigManager.get_instance().set_config('Game Config', self.game_data)
 
     def set_game_root(self, game_properties):
         self.game_data['game_root'] = os.path.join(self.launcher_config['General']['Games Location'],
@@ -48,6 +50,6 @@ class GameLauncher(Plugin):
         pass
 
     name = None
-    game_data = None
+    game_data = {}
     launcher_params = None
     launcher_config = None
