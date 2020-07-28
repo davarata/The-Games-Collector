@@ -8,7 +8,7 @@ Everything should be driven using a single game descriptor file, which tells the
 
 This is that launcher.
 
-It consists of plugins for the individual launchers, input mappers and screen handlers (switching screens on/off and changing the resulution).
+It consists of plugins for the individual launchers, input mappers and screen handlers (switching screens on/off and changing the resolution).
 
 There are launchers for
 - DOSBox
