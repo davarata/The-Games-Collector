@@ -48,8 +48,8 @@ class XrandrDisplayHandler(DisplayHandler):
                 if resolutions[right] != 'current':
                     outputs[right]['mode'] = resolutions[right]
 
-        xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(outputs)
-        print(xrandr_cmd)
+        # TODO: build_xrandr_parameters adds an extra space at the end which causes xrandr to throw an error. fix it
+        xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(outputs).strip()
         subprocess.Popen(xrandr_cmd.split(' ')).wait()
         time.sleep(2)
 
@@ -59,7 +59,8 @@ class XrandrDisplayHandler(DisplayHandler):
     def restore_resolution(self):
         time.sleep(2)
         # TODO first make sure that I actually need to restore the resolution
-        xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(self.saved_outputs)
+        # TODO: build_xrandr_parameters adds an extra space at the end which causes xrandr to throw an error. fix it
+        xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(self.saved_outputs).strip()
         print(xrandr_cmd)
         subprocess.Popen(xrandr_cmd.split(' ')).wait()
 
@@ -134,7 +135,7 @@ class XrandrDisplayHandler(DisplayHandler):
                     outputs[right].get('offset') is not None and int(outputs[right]['offset']) > 0:
                         raise Exception('Both outputs cannot have an offset > 0.')
         else:
-            if outputs[left]['off']:
+            if not outputs[left]['on']:
                 raise Exception('Cannot turn the only output off.')
 
         if outputs[left]['mode'] == 'auto':

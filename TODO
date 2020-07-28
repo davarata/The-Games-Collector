@@ -1,5 +1,11 @@
+- Get a way to set game defaults. Most console / arcade games currently needs to indicate which keyboard to keyboard
+  mapper to use and for most games the resolution needs to be specified. This can be placed once in a file and
+  overridden as required.
 - Allow RetroArch DOS games to use Optical disks
 - Add version support to the launchers (eg: wine 1.6, wine 1.8, ...)
 - Reverse the counter-intuitive input mappings.
 - Add requirements to the plugins. The DOSBox mapper requires the DOSBox launcher, Wine requires Linux...
 - Change the mappers to be able to interpret #NO_SUPPORTED#
+- Change code to undo environment changes made by last game. For this to work, a the restore_env method for each each plugin that was used should be executed. Additionally, a check should be added that checks to see if the environment has been restored. The launcher should refuse to start or should at least prompt the user in order to return the system to its previous state before starting the new game.
+- I need to add a mechanism for telling all the applications used to turn on logging / be more verbose. For testing purposes.
+

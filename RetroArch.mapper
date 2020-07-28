@@ -58,10 +58,20 @@ N64.B = b
 N64.L = l
 N64.R = r
 N64.Z = l2
-N64.cUp = r_y_minux
+N64.cUp = r_y_minus
 N64.cDown = r_y_plus
 N64.cLeft = r_x_minus
 N64.cRight = r_x_plus
+
+# Nintendo Entertainment System (NES)
+NES.Start = start
+NES.Select = select
+NES.Up = up
+NES.Down = down
+NES.Left = left
+NES.Right = right
+NES.A = a
+NES.B = b
 
 # Super Nintendo Entertainment System (SNES)
 SNES.Start = start

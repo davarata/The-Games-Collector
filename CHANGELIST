@@ -1,5 +1,59 @@
 ------------------------------------------------------------------------------------------------------------------------
- Commit ID:
+ Commit ID: 
+------------------------------------------------------------------------------------------------------------------------
+
+ The main focus of this commit was to enable the plugin system to handle different versions of the plugins, specifically
+ to enable the launchers to support different versions.
+
+Overall
+-------
+
+ - - - - -
+
+
+Individual components
+---------------------
+ - Display handler (display_handler.py)
+   Updated the display handler base class to handle plugin versioning. The display handler does not support it, so it is
+   currently ignored. 
+
+ - Xrandr display handler (xrandr_display_handler.py) 
+   The build_xrandr_parameters() method adds an extra space at the end which causes xrandr to throw an error. A quick
+   workaround has been added to address this. The bug that causes a single display systems to break has been fixed.
+
+ - DOSBox launcher (dosbox_launcher.py)
+   Updated the launcher to use the new get_executable() method instead to referencing the executable directly, thus
+   allowing the plugin system to make sure the executable for this specific version is used.
+
+ - Game launcher (game_launcher.py)
+   Updated the game launcher plugin base class to ensure the correct version of a launcher's configuration files are
+   used when a launcher is started. Methods have also been added to help with verification of the different launcher
+   configuration files. The get_executable() method has been added to ensure that the correct version of the launcher is
+   executed.
+
+ - RetroArch (retroarch_launcher.py)
+   Newer versions of the MAME core requires more of the expected directory structure to exist than in the previous MAME
+   core. Links for these are now also created and removed before a game starts and after it finishes. Because of these
+   required directories, the target (executable) location is changed accordingly. The hard-coded core information has
+   been removed. As a result, the code that sets the core to be used when a game is played has been updated. Additonal
+   verification has been added in the verify_version() method to check if the cores location is valid. 
+
+ - ScummVM launcher (scummvm_launcher.py)
+   Updated the launcher to use the new get_executable() method instead to referencing the executable directly, thus
+   allowing the plugin system to make sure the executable for this specific version is used.
+   
+ - Wine launcher (wine_launcher.py)
+   Updated the launcher to use the new get_executable() method instead to referencing the executable directly, thus
+   allowing the plugin system to make sure the executable for this specific version is used. Changed the launcher
+   parameters to lower case. Added an empty implementation for the configure_env() method since Wine does not have
+   configuration files like the other launchers have. 
+
+ - Input mapper base class (input_mapper.py)
+   Updated the input mapper base class to handle plugin versioning. The input mapper does not support it, so it is
+   currently igonred.
+
+------------------------------------------------------------------------------------------------------------------------
+ Commit ID: 148b1573274924bf326e05577590402f57441fe0, a0cdacb8c9ca2fdb99c0c59c8e6774cc79798e3b
 ------------------------------------------------------------------------------------------------------------------------
 
  The main focus of this commit was to add the DOSBox mapper.

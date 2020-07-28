@@ -3,6 +3,8 @@ import sys
 
 
 # TODO remove any methods that simply get or set data. simply use variables.
+from pathlib import Path
+
 from config_manager import ConfigManager
 from plugins.plugin_handler import Plugin
 
@@ -37,7 +39,22 @@ class GameLauncher(Plugin):
         pass
 
     def configure_env(self):
-        pass
+        if os.path.islink(self.get_config()['General'].get('Config location')):
+            os.unlink(self.get_config()['General'].get('Config location'))
+
+        if os.path.exists(self.get_config()['General'].get('Config location')):
+            raise Exception('The configuration location \'' + self.get_config()['General'].get('Config location') +
+                            '\' exists.')
+
+        if self.version is None:
+            return
+
+        if not os.path.exists(self.get_config()['General'].get('Config location') + '_' + self.version):
+            raise Exception('Path ' + self.get_config()['General'].get('Config location') + '_' + self.version +
+                            ' does not exist.')
+
+        Path(self.get_config()['General'].get('Config location')).\
+            symlink_to(self.get_config()['General'].get('Config location') + '_' + self.version)
 
     def get_platform_description(self):
         return self.game_data['platform']
@@ -47,9 +64,37 @@ class GameLauncher(Plugin):
 
     # TODO rename to
     def revert_env(self):
-        pass
+        if os.path.islink(self.get_config()['General'].get('Config Location')):
+            os.unlink(self.get_config()['General'].get('Config Location'))
+
+    def verify_version(self, config_file):
+        config = ConfigManager.get_instance().load_config(config_file, save_config=False)
+        _ignore, version = config_file.split('_', 1)
+
+        if config['Launcher'].get('Executable') is None:
+            raise Exception('Executable property not found for ' + self.name + ' version ' + version)
+        if not os.path.exists(config['Launcher']['Executable']):
+            raise Exception('Executable \'' + config['Executable'] + '\' not found for ' +
+                            self.name + ' version ' + version)
+
+    def verify_versions(self):
+        super().verify_versions()
+
+        config = ConfigManager.get_instance().load_config(self.get_plugin_name(), save_config=False)
+
+        if config is None:
+            return
+
+        if not config.has_section('General'):
+            raise Exception('Configuration file for ' + self.name + ' does not contain a General section.')
+        if config['General'].get('Config Location') is None:
+            raise Exception('Config location property not found for ' + self.name + '.')
+
+    def get_executable(self):
+        return self.get_config()['Launcher']['Executable']
 
     name = None
+    # TODO remove game_data. This should be referenced using ConfigManager
     game_data = {}
     launcher_params = None
     launcher_config = None

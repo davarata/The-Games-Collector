@@ -23,7 +23,7 @@ from config_manager import ConfigManager
 
 def add_descriptor(game_desc_file):
     shutil.copyfile(game_desc_file,
-                    os.environ.get('HOME') + '/.config/application-launcher/' + game_desc_file.rpartition('/')[2])
+                    os.environ.get('HOME') + '/.config/the-games-collector/' + game_desc_file.rpartition('/')[2])
 
 
 def add_game(game_desc_file, icon_file):
@@ -102,7 +102,7 @@ def add_menu_entry(launcher, game_properties):
 
 def change_resolution(game_data):
     if game_data['resolution'] is not None:
-        display_handler.get_implementation().change_resolution(game_data['resolution'])
+        display_handler.get_implementation(ignore_versions=True).change_resolution(game_data['resolution'])
 
 
 def check_expected_properties(launcher, game_properties):
@@ -160,7 +160,7 @@ def check_optical_disk(game_data, config, game):
 
 # TODO Decide if I want to pass launcher or game_data
 def configure_env(launcher):
-    display_handler.get_implementation().save_resolution()
+    display_handler.get_implementation(ignore_versions=True).save_resolution()
     change_resolution(launcher.game_data)
     launcher.configure_env()
 
@@ -189,7 +189,15 @@ def init_launcher(descriptor, config):
     launcher_params = None
     if game_properties.get('Launcher') is not None and len(game_properties['Launcher']) > 0:
         launcher_name, *launcher_params = [p.strip() for p in game_properties['Launcher'].split(',')]
-    launcher = game_launcher.get_implementation(game_properties['Platform'], launcher_name)
+        launcher_params = [p.lower() for p in launcher_params]
+
+    version = None
+    if launcher_params is not None:
+        for param in launcher_params:
+            if param.startswith('version'):
+                version = param.split('=')[1]
+
+    launcher = game_launcher.get_implementation(game_properties['Platform'], launcher_name, version=version)
 
     launcher.game_data['platform'] = game_properties['Platform']
     launcher.launcher_params = launcher_params
@@ -215,9 +223,8 @@ def init_launcher(descriptor, config):
 
 
 def launch_game(id):
-    if not os.path.isfile(os.environ.get('HOME') + '/.config/application-launcher/' + id + '.game'):
-        print('Game ' + id + ' not found.')
-        sys.exit(1)
+    if ConfigManager.get_instance().find_config_file(id, extension='game', skip_inst_dir=False) is None:
+        raise Exception('Game ' + id + ' not found.')
 
     game_descriptor = ConfigManager.get_instance().load_config(id, extension='game', skip_inst_dir=True)
     # TODO Reconsider adding the ID here. Don't like it.
@@ -225,6 +232,10 @@ def launch_game(id):
 
     # TODO Consider moving this somewhere else so that it will only be done once
     # TODO this config file contains launcher specific config...
+    # TODO the name game-launcher should be changed to the-games-collector.
+    # Also, this is the file that should be replaced by another file (for testing). This config file should contain
+    # the information that indicates where the user directories are (or you should be able to override them from here)
+    # This should make it possible to remove the test-specific parameters.
     config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
 
     launcher = init_launcher(game_descriptor, config)
@@ -249,7 +260,8 @@ def launch_game(id):
 
 def revert_env(launcher):
     launcher.revert_env()
-    display_handler.get_implementation().restore_resolution()
+    # TODO sort out the problem with the non game-launcher plugins and versioning
+    display_handler.get_implementation(ignore_versions=True).restore_resolution()
 
 
 def set_game_menu_data(game_data, game_properties):
@@ -309,7 +321,7 @@ def get_used_mappers(control_properties):
         implementation = None
         if mapping_type.find('=') > 0:
             mapping_type, implementation = mapping_type.split('=')
-        input_mapper_impl = input_mapper.get_implementation(mapping_type, implementation)
+        input_mapper_impl = input_mapper.get_implementation(mapping_type, implementation, ignore_versions=True)
         input_mapper_impl.set_mappings(input_mappings)
         used_mappers.append(input_mapper_impl)
 
@@ -420,7 +432,7 @@ def get_mapping_token(string, separators):
 def validate_all():
     config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
     # TODO remove hard-coded config locations
-    files = glob.glob(os.environ.get('HOME') + '/.config/application-launcher/*.game')
+    files = glob.glob(os.environ.get('HOME') + '/.config/the-games-collector/*.game')
     for file in files:
         game_descriptor = configparser.ConfigParser(strict=False)
         game_descriptor.read(file)
@@ -430,16 +442,6 @@ def validate_all():
         except:
             print(file)
             raise
-
-install_dir = os.path.dirname(os.path.realpath(__file__))
-game_launcher = GameLauncher()
-game_launcher.init(install_dir)
-
-input_mapper = InputMapper()
-input_mapper.init(install_dir)
-
-display_handler = DisplayHandler()
-display_handler.init(install_dir)
 
 parser = argparse.ArgumentParser()
 sub_parsers = parser.add_subparsers()
@@ -462,10 +464,21 @@ launch_parser.add_argument('-i', '--installation-location')
 
 args = parser.parse_args()
 
-if args.config_location is not None:
-    ConfigManager.get_instance().set_user_dir(args.config_location)
-if args.installation_location is not None:
-    ConfigManager.get_instance().set_inst_dir(args.installation_location)
+if args.action == 'play':
+    if args.config_location is not None:
+        ConfigManager.get_instance().set_user_dir(args.config_location)
+    if args.installation_location is not None:
+        ConfigManager.get_instance().set_inst_dir(args.installation_location)
+
+install_dir = os.path.dirname(os.path.realpath(__file__))
+game_launcher = GameLauncher()
+game_launcher.init(install_dir)
+
+input_mapper = InputMapper()
+input_mapper.init(install_dir)
+
+display_handler = DisplayHandler()
+display_handler.init(install_dir)
 
 if args.action == 'add':
     add_game(args.descriptor, args.icon)

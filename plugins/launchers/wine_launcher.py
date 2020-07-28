@@ -20,18 +20,19 @@ class WINELauncher(GameLauncher):
         wine_env = os.environ.copy()
         wine_env['WINEDEBUG'] = '-all'
         wine_env['WINEPREFIX'] = self.game_data['game_root']
+        wine_env['WINEARCH'] = "win32"
 #        wine_env['DISPLAY'] = ':0.0'
 
-        cmd = ['wine', self.game_data['target']]
+        cmd = [self.get_executable(), self.game_data['target']]
 
-        if self.launcher_params is not None and 'SINGLE_CPU' in self.launcher_params:
+        if self.launcher_params is not None and 'single_cpu' in self.launcher_params:
             cmd = ['schedtool', '-a', '0x2', '-e'] + cmd
 
         wine = subprocess.Popen(cmd, cwd=self.game_data['working_dir'], env=wine_env)
         self.wait(wine)
 
     def wait(self, process):
-        if self.launcher_params is not None and 'USE_ALTERNATE_WAIT' in self.launcher_params:
+        if self.launcher_params is not None and 'use_alternate_wait' in self.launcher_params:
             time.sleep(4)
 
             path, *ignore = self.game_data['target'].rpartition('/')
@@ -46,6 +47,11 @@ class WINELauncher(GameLauncher):
                     continue
         else:
             process.wait()
+
+    def configure_env(self):
+        # Wine does not handle configuration like the rest of the launchers, so do not try to mess with the
+        # configuration locations
+        pass
 
     name = 'Wine'
     supported_implementations = {'Windows'}

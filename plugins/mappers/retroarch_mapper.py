@@ -44,5 +44,6 @@ class RetroArchMapper(InputMapper):
         'MasterSystem:Xbox360',
         'MegaDrive:Xbox360',
         'N64:Xbox360',
+        'NES:Xbox360',
         'SNES:Xbox360',
     }

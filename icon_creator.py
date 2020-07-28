@@ -69,8 +69,8 @@ if __name__ == '__main__':
     # Try and use the command-line parameters first. If a config file is found, the command-line
     # parameters will be ignored.
     config = configparser.ConfigParser()
-    if os.path.isfile(os.environ.get('HOME') + '/.config/application-launcher/icon-creator.cfg'):
-        config.read(os.environ.get('HOME') + '/.config/application-launcher/icon-creator.cfg')
+    if os.path.isfile(os.environ.get('HOME') + '/.config/the-games-collector/icon-creator.cfg'):
+        config.read(os.environ.get('HOME') + '/.config/the-games-collector/icon-creator.cfg')
         add_icon(args.svg, config)
     else:
         create_icons(args.svg, args.sizes, args.icon_set_root, args.icon_path_pattern)

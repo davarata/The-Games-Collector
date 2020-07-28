@@ -7,7 +7,7 @@ from plugins.launchers.game_launcher import GameLauncher
 class LinuxLauncher(GameLauncher):
 
     def launch_game(self):
-        if self.game_data['executable_type'] == 'script':
+        if self.game_data.get('executable_type') is not None and self.game_data['executable_type'] == 'script':
             subprocess.Popen(['sh', self.game_data['target']]).wait()
         else:
             subprocess.Popen([self.game_data['target']]).wait()
@@ -33,6 +33,15 @@ class LinuxLauncher(GameLauncher):
             sys.exit(1)
 
         self.game_data['executable_type'] = 'script'
+
+    def get_default_version(self):
+        return None
+
+    def configure_env(self):
+        pass
+
+    def revert_env(self):
+        pass
 
     name = 'Linux'
     supported_implementations = {'Linux'}

@@ -18,7 +18,7 @@ class DOSBoxLauncher(GameLauncher):
             self.timidity = subprocess.Popen(['timidity', '-iA', '-c', '/tmp/timidity.cfg'])
             time.sleep(1)
 
-        subprocess.Popen(['dosbox', '-conf', self.game_data['target']]).wait()
+        subprocess.Popen([self.get_executable(), '-conf', self.game_data['target']]).wait()
 
     def revert_env(self):
         if self.game_data['soundfont'] is not None:

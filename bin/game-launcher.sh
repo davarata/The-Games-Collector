@@ -1,3 +1,3 @@
 #!/bin/bash
-python3 /usr/local/the-games-collector/the-games-collector.py $*
+python3 /opt/the-games-collector/the-games-collector.py $*
 

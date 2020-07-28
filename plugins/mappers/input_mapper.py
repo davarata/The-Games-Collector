@@ -8,7 +8,7 @@ class InputMapper(Plugin):
 
     def init(self, install_dir):
         self.install_dir = install_dir
-        self.load_plugins('plugins.mappers', InputMapper)
+        self.load_plugins('plugins.mappers', InputMapper, ignore_versions=True)
 
     def set_mappings(self, mappings):
         self.input_mappings = []

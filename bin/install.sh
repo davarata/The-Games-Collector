@@ -1,65 +1,20 @@
 #!/bin/bash
 
-# TODO convert to python script
+# ./install.sh /opt
 
-INSTALL_DIR=$(pwd | sed 's:\ :\\\ :g')
+mkdir ${1}/the-games-collector
+cp ../bin ${1}/the-games-collector -R
+cp ../config ${1}/the-games-collector -R
+cp ../plugins ${1}/the-games-collector -R
+cp ../*.mapper ${1}/the-games-collector
+cp ../*.py ${1}/the-games-collector
+cp ../*.map ${1}/the-games-collector
 
-if [ -d "${INSTALL_DIR}" ] && [ -f "${INSTALL_DIR}/bin/game-launcher.sh" ] ; then
-    if [ -e /usr/local/bin/game-launcher ] ; then
-		echo "/usr/local/bin/game-launcher found. Skipping..."
-	else
-		sudo ln -s ${INSTALL_DIR}/bin/game-launcher.sh /usr/local/bin/game-launcher
-	fi
-else
-	echo "Error: ${INSTALL_DIR}/bin/game-launcher.sh not found"
-    exit 1
-fi
+ln -s ${1}/the-games-collector/bin/game-launcher.sh /usr/local/bin/game-launcher
 
-if [ -d ~/.local/share/icons/hicolor/16x16/apps ] ; then
-	echo "~/.local/share/icons/hicolor/16x16/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/16x16/apps
-fi
+TMP_FILE=/tmp/tgc_inst_$(date +%N).sh
 
-if [ -d ~/.local/share/icons/hicolor/22x22/apps ] ; then
-	echo "~/.local/share/icons/hicolor/22x22/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/22x22/apps
-fi
+find ${1}/the-games-collector -iname *__pycache__* -exec echo "rm '{}' -rf" >> ${TMP_FILE} ';'
 
-if [ -d ~/.local/share/icons/hicolor/24x24/apps ] ; then
-	echo "~/.local/share/icons/hicolor/24x24/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/24x24/apps
-fi
-
-if [ -d ~/.local/share/icons/hicolor/32x32/apps ] ; then
-	echo "~/.local/share/icons/hicolor/32x32/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/32x32/apps
-fi
-
-if [ -d ~/.local/share/icons/hicolor/48x48/apps ] ; then
-	echo "~/.local/share/icons/hicolor/48x48/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/48x48/apps
-fi
-
-if [ -d ~/.local/share/icons/hicolor/64x64/apps ] ; then
-	echo "~/.local/share/icons/hicolor/64x64/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/64x64/apps
-fi
-
-if [ -d ~/.local/share/icons/hicolor/128x128/apps ] ; then
-	echo "~/.local/share/icons/hicolor/128x128/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/128x128/apps
-fi
-
-if [ -d ~/.local/share/icons/hicolor/256x256/apps ] ; then
-	echo "~/.local/share/icons/hicolor/256x256/apps exists. Skipping..."
-else
-	mkdir -p ~/.local/share/icons/hicolor/256x256/apps
-fi
-
+sh ${TMP_FILE}
+rm ${TMP_FILE}
