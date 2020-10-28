@@ -247,15 +247,16 @@ def launch_game(id):
     check_optical_disk(launcher.game_data, config, game_descriptor['Game'])
 
     activate_input_mappers(used_mappers)
-    configure_env(launcher)
+    try:
+        configure_env(launcher)
 
     # # TODO: Figure out what to do with the line below
     # launcher.game_data['platform_config'] = config['General']['Platform Config']
 
-    launcher.launch_game()
-
-    revert_env(launcher)
-    deactivate_input_mappers(used_mappers)
+        launcher.launch_game()
+    finally:
+        revert_env(launcher)
+        deactivate_input_mappers(used_mappers)
 
 
 def revert_env(launcher):
@@ -450,6 +451,8 @@ add_parser = sub_parsers.add_parser('add')
 add_parser.set_defaults(action='add')
 add_parser.add_argument('--descriptor', required=True)
 add_parser.add_argument('--icon')
+add_parser.add_argument('-c', '--config-location')
+add_parser.add_argument('-i', '--installation-location')
 
 launch_parser = sub_parsers.add_parser('play')
 launch_parser.set_defaults(action='play')
