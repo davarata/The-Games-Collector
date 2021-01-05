@@ -102,7 +102,7 @@ class RetroArchLauncher(GameLauncher):
                 shader_file.write('#reference "' + video_shader + '"')
                 shader_file.close()
 
-        if self.game_data['platform'] == 'Arcade':
+        if self.game_data['platform'] == 'Arcade': # used by mame2010
             Path(self.game_data['game_root'] + '/nvram').symlink_to(self.game_data['game_root'])
             Path(self.game_data['game_root'] + '/roms').symlink_to(self.game_data['game_root'])
             Path(self.game_data['game_root'] + '/cfg').symlink_to(self.game_data['game_root'])
@@ -118,7 +118,7 @@ class RetroArchLauncher(GameLauncher):
 
     def revert_env(self):
         super().revert_env()
-        if self.game_data['platform'] == 'Arcade':
+        if self.game_data['platform'] == 'Arcade': # used by mame2010
             os.unlink(os.path.join(self.game_data['game_root'], 'nvram'))
             os.unlink(os.path.join(self.game_data['game_root'], 'roms'))
             os.unlink(os.path.join(self.game_data['game_root'], 'cfg'))
@@ -126,25 +126,16 @@ class RetroArchLauncher(GameLauncher):
             os.unlink(self.get_config()['ScummVM'].get('Config location'))
 
     def set_launcher_data(self, descriptor):
-        if self.launcher_params is not None:
-            for param in self.launcher_params:
-                if param.startswith('core'):
-                    self.game_data['core'] = param.split('=')[1].strip()
+        self.game_data['core'] = self.get_retroarch_property('core')
 
         if self.game_data.get('core') is None:
             self.game_data['core'] = self.get_config()[self.game_data['platform']]['Core']
 
-        found_core = False
-        for implementation in self.supported_implementations:
-            core = self.get_config()[implementation].get('Core')
-            if core is not None and core == self.game_data['core']:
-                found_core = True
-
-        if not found_core:
+        core_file = os.path.join(self.get_config()['Launcher']['Cores Location'], self.game_data['core'] + '.so')
+        if not os.path.isfile(core_file):
             raise Exception('Unknown core: ' + self.game_data['core'])
 
-        self.game_data['core'] = os.path.join(self.get_config()['Launcher']['Cores Location'],
-                                              self.game_data['core'] + '.so')
+        self.game_data['core'] = core_file
 
     def verify_version(self, config_file):
         super().verify_version(config_file)
