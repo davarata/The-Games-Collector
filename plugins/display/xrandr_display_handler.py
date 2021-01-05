@@ -48,6 +48,7 @@ class XrandrDisplayHandler(DisplayHandler):
                 if resolutions[right] != 'current':
                     outputs[right]['mode'] = resolutions[right]
 
+        resolution_changed = True
         # TODO: build_xrandr_parameters adds an extra space at the end which causes xrandr to throw an error. fix it
         xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(outputs).strip()
         subprocess.Popen(xrandr_cmd.split(' ')).wait()
@@ -57,6 +58,9 @@ class XrandrDisplayHandler(DisplayHandler):
         self.saved_outputs = self.get_display_outputs()
 
     def restore_resolution(self):
+        if not self.resolution_changed:
+            return
+
         time.sleep(2)
         # TODO first make sure that I actually need to restore the resolution
         # TODO: build_xrandr_parameters adds an extra space at the end which causes xrandr to throw an error. fix it
@@ -178,3 +182,4 @@ class XrandrDisplayHandler(DisplayHandler):
         return left_output + ' ' + right_output
 
     saved_outputs = None
+    resolution_changed = False

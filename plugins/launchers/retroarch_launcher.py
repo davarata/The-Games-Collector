@@ -102,7 +102,6 @@ class RetroArchLauncher(GameLauncher):
                 shader_file.write('#reference "' + video_shader + '"')
                 shader_file.close()
 
-
         if self.game_data['platform'] == 'Arcade':
             Path(self.game_data['game_root'] + '/nvram').symlink_to(self.game_data['game_root'])
             Path(self.game_data['game_root'] + '/roms').symlink_to(self.game_data['game_root'])

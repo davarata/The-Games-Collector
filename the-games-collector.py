@@ -489,7 +489,6 @@ elif args.action == 'play':
     try:
         launch_game(args.id)
     finally:
-        pass
         display_handler.restore_resolution()
 elif args.action == 'validate-all':
     validate_all()
