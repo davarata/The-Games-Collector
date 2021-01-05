@@ -161,28 +161,38 @@ class RetroArchLauncher(GameLauncher):
             with open(game_config) as f:
                 for line in f:
                     entries = line.split("=")
-                    if entries[0].strip() == name:
+                    if entries[0].strip().lower() == name.lower():
                         return entries[1].replace('"', '').strip()
 
         config = self.get_config()
         if config is not None and config.has_section(self.game_data['platform']):
             platform_config = config[self.game_data['platform']]
-            if platform_config[name] != None:
-                return platform_config[name].replace('"', '').strip()
+            for key in platform_config.keys():
+                if key.lower() == name.lower():
+                    return platform_config[key].replace('"', '').strip()
 
         with open(self.get_config()['General'].get('Config location') + '/retroarch.cfg') as f:
             for line in f:
                 entries = line.split("=")
-                if entries[0].strip() == name:
+                if entries[0].strip().lower() == name.lower():
                     return entries[1].replace('"', '').strip()
 
         return value
 
     def get_corename(self):
+        core = self.get_retroarch_property('core')
+
+        coreinfo = ConfigManager.get_instance().get_config('coreinfo')
+        if coreinfo is None:
+            coreinfo = ConfigManager.get_instance().load_config('cores', extension='info', skip_inst_dir=True)
+
+        if coreinfo is not None:
+            if core is not None and coreinfo.has_section(core):
+                return coreinfo[core]['corename'].replace('"', '')
+
         config = self.get_config()
         if config is not None and config.has_section(self.game_data['platform']):
-            platform_config = config[self.game_data['platform']]
-            info_file = config['Launcher']['cores location'] + '/' + platform_config['core'] + '.info'
+            info_file = config['Launcher']['cores location'] + '/' + core + '.info'
 
             with open(info_file) as f:
                 for line in f:
