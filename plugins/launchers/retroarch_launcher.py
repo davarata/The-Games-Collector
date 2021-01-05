@@ -78,6 +78,31 @@ class RetroArchLauncher(GameLauncher):
 
     def configure_env(self):
         super().configure_env()
+
+        core_path = self.get_config()['General'].get('Config location') + '/config/' + self.get_corename()
+        if not os.path.isdir(core_path):
+            os.mkdir(core_path)
+
+        if os.path.islink(self.get_config()['General'].get('Config location') + '/states'):
+            os.unlink(self.get_config()['General'].get('Config location') + '/states')
+        Path(self.get_config()['General'].get('Config location') + '/states'). \
+            symlink_to(self.game_data['game_root'])
+
+        if self.get_retroarch_property('video_shader_enable', 'false') == 'true':
+            video_shader = self.get_retroarch_property('video_shader')
+            if video_shader != '':
+                *_ignore, extension = video_shader.rpartition('.')
+                game_name = self.game_data['target']
+                if game_name.rfind('/') > 0:
+                    game_name = game_name[game_name.rfind('/') + 1:]
+                if game_name.find('.') > 0:
+                    game_name = game_name[:game_name.rfind('.')]
+
+                shader_file = open(core_path + '/' + game_name + '.' + extension, 'w')
+                shader_file.write('#reference "' + video_shader + '"')
+                shader_file.close()
+
+
         if self.game_data['platform'] == 'Arcade':
             Path(self.game_data['game_root'] + '/nvram').symlink_to(self.game_data['game_root'])
             Path(self.game_data['game_root'] + '/roms').symlink_to(self.game_data['game_root'])
@@ -135,6 +160,49 @@ class RetroArchLauncher(GameLauncher):
         if not os.path.exists(config['Launcher']['Cores Location']):
             raise Exception('The cores location path \'' + config['Launcher']['Cores Location'] + '\' specified in ' + self.name +
                             ' version ' + version + ' does not exist.')
+
+    def get_retroarch_property(self, name, value = ''):
+        game_config = self.game_data['target']
+        if game_config.find('.') > 0:
+            game_config = game_config[:game_config.rfind('.')]
+        game_config = game_config + '.cfg'
+
+        if os.path.isfile(game_config):
+            with open(game_config) as f:
+                for line in f:
+                    entries = line.split("=")
+                    if entries[0].strip() == name:
+                        return entries[1].replace('"', '').strip()
+
+        config = self.get_config()
+        if config is not None and config.has_section(self.game_data['platform']):
+            platform_config = config[self.game_data['platform']]
+            if platform_config[name] != None:
+                return platform_config[name].replace('"', '').strip()
+
+        with open(self.get_config()['General'].get('Config location') + '/retroarch.cfg') as f:
+            for line in f:
+                entries = line.split("=")
+                if entries[0].strip() == name:
+                    return entries[1].replace('"', '').strip()
+
+        return value
+
+    def get_corename(self):
+        config = self.get_config()
+        if config is not None and config.has_section(self.game_data['platform']):
+            platform_config = config[self.game_data['platform']]
+            info_file = config['Launcher']['cores location'] + '/' + platform_config['core'] + '.info'
+
+            with open(info_file) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('corename'):
+                        *_ignore, corename = line.rpartition('=')
+                        corename = corename.replace('"', '')
+                        return corename.strip()
+
+        return ''
 
     name = 'RetroArch'
 
