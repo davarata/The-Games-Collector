@@ -47,7 +47,8 @@ class RetroArchLauncher(GameLauncher):
 
         config_file = open('/tmp/game-launcher.cfg', 'w')
         for key in sorted(self.launch_config.keys()):
-            config_file.write(key + ' = ' + self.launch_config[key] + os.linesep)
+            if key not in ['core', 'video_shader']:
+                config_file.write(key + ' = ' + self.launch_config[key] + os.linesep)
         config_file.close()
         config_files = '/tmp/game-launcher.cfg'
 
@@ -88,15 +89,20 @@ class RetroArchLauncher(GameLauncher):
         Path(self.get_config()['General'].get('Config location') + '/states'). \
             symlink_to(self.game_data['game_root'])
 
+        game_name = self.game_data['target']
+        if game_name.rfind('/') > 0:
+            game_name = game_name[game_name.rfind('/') + 1:]
+        if game_name.find('.') > 0:
+            game_name = game_name[:game_name.rfind('.')]
+
+        for e in (['cgp', 'glslp']):
+            if os.path.isfile(core_path + '/' + game_name + '.' + e):
+                os.remove(core_path + '/' + game_name + '.' + e)
+
         if self.get_retroarch_property('video_shader_enable', 'false') == 'true':
             video_shader = self.get_retroarch_property('video_shader')
             if video_shader != '':
                 *_ignore, extension = video_shader.rpartition('.')
-                game_name = self.game_data['target']
-                if game_name.rfind('/') > 0:
-                    game_name = game_name[game_name.rfind('/') + 1:]
-                if game_name.find('.') > 0:
-                    game_name = game_name[:game_name.rfind('.')]
 
                 shader_file = open(core_path + '/' + game_name + '.' + extension, 'w')
                 shader_file.write('#reference "' + video_shader + '"')
