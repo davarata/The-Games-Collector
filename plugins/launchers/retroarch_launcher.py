@@ -230,8 +230,12 @@ class RetroArchLauncher(GameLauncher):
                         dosbox_cpu_core = line[line.rfind('=') + 1:].replace('"', '')
                     if line.startswith('cycles'):
                         dosbox_cpu_cycles_multiplier = 1000
+                        value = line[line.rfind('=') + 1:].replace('"', '')
+                        if value.lower() == 'auto':
+                            cpu_cycles = 20000
+                        else:
+                            cpu_cycles = int(value)
 
-                        cpu_cycles = int(line[line.rfind('=') + 1:].replace('"', ''))
                         if cpu_cycles < 9000:
                             dosbox_cpu_cycles_multiplier = 1000
                         elif cpu_cycles < 90000:
