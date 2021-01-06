@@ -19,12 +19,6 @@ class RetroArchLauncher(GameLauncher):
             return super(RetroArchLauncher, self).get_platform_description()
 
     def launch_game(self):
-        config = self.get_config()
-        if config is not None and config.has_section(self.game_data['platform']):
-            platform_config = config[self.game_data['platform']]
-            for key in platform_config:
-                self.launch_config[key] = self.replace_tokens(platform_config[key])
-
         game_config = self.game_data['target']
         if game_config.find('.') > 0:
             game_config = game_config[:game_config.rfind('.')]
@@ -47,7 +41,7 @@ class RetroArchLauncher(GameLauncher):
 
         config_file = open('/tmp/game-launcher.cfg', 'w')
         for key in sorted(self.launch_config.keys()):
-            if key not in ['core', 'video_shader']:
+            if key not in ['core', 'video_shader', 'savefile_directory', 'savestate_directory']:
                 config_file.write(key + ' = ' + self.launch_config[key] + os.linesep)
         config_file.close()
         config_files = '/tmp/game-launcher.cfg'
@@ -69,14 +63,6 @@ class RetroArchLauncher(GameLauncher):
             config_files]
         subprocess.Popen(parameters, cwd=self.game_data['working_dir']).wait()
 
-    # TODO rename this method
-    def replace_tokens(self, value):
-        value = value.strip()
-        if value.startswith('${') and value.endswith('}') and self.game_data.get(value[2:-1]) is not None:
-            return self.game_data.get(value[2:-1])
-
-        return value
-
     def configure_env(self):
         super().configure_env()
 
@@ -84,10 +70,11 @@ class RetroArchLauncher(GameLauncher):
         if not os.path.isdir(core_path):
             os.mkdir(core_path)
 
-        if os.path.islink(self.get_config()['General'].get('Config location') + '/states'):
-            os.unlink(self.get_config()['General'].get('Config location') + '/states')
-        Path(self.get_config()['General'].get('Config location') + '/states'). \
-            symlink_to(self.game_data['game_root'])
+        for l in ['states', 'saves']:
+            if os.path.islink(self.get_config()['General'].get('Config location') + '/' + l):
+                os.unlink(self.get_config()['General'].get('Config location') + '/' + l)
+            Path(self.get_config()['General'].get('Config location') + '/' + l). \
+                symlink_to(self.game_data['game_root'])
 
         game_name = self.game_data['target']
         if game_name.rfind('/') > 0:
