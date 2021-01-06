@@ -1,3 +1,4 @@
+import math
 import os
 import subprocess
 from pathlib import Path
@@ -99,6 +100,8 @@ class RetroArchLauncher(GameLauncher):
             Path(self.game_data['game_root'] + '/nvram').symlink_to(self.game_data['game_root'])
             Path(self.game_data['game_root'] + '/roms').symlink_to(self.game_data['game_root'])
             Path(self.game_data['game_root'] + '/cfg').symlink_to(self.game_data['game_root'])
+        if self.game_data['core'].endswith('dosbox_libretro.so'):
+            self.write_game_opt(game_name)
         if self.game_data['core'].endswith('scummvm_libretro.so'):
             if os.path.islink(self.get_config()['ScummVM'].get('Config location')):
                 os.unlink(self.get_config()['ScummVM'].get('Config location'))
@@ -196,6 +199,97 @@ class RetroArchLauncher(GameLauncher):
                         return corename.strip()
 
         return ''
+
+    def write_game_opt(self, game_name):
+        dosbox_cpu_core = 'auto'
+        dosbox_cpu_cycles = 1
+        dosbox_cpu_cycles_multiplier = 1000
+        dosbox_cpu_type = 'auto'
+        dosbox_disney = 'false'
+        dosbox_machine_type = 'svga_s3'
+        dosbox_pcspeaker = 'false'
+        dosbox_sblaster_base = '220'
+        dosbox_sblaster_dma = '1'
+        dosbox_sblaster_hdma = '7'
+        dosbox_sblaster_irq = '5'
+        dosbox_sblaster_opl_emu = 'default'
+        dosbox_sblaster_opl_mode = 'auto'
+        dosbox_sblaster_type = 'sb16'
+        dosbox_scaler = 'none'
+        dosbox_tandy = 'auto'
+
+        if self.game_data['target'].endswith('.conf'):
+            with open(self.game_data['target']) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('machine'):
+                        dosbox_machine_type = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('scaler'):
+                        dosbox_scaler = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('core'):
+                        dosbox_cpu_core = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('cycles'):
+                        dosbox_cpu_cycles_multiplier = 1000
+
+                        cpu_cycles = int(line[line.rfind('=') + 1:].replace('"', ''))
+                        if cpu_cycles < 9000:
+                            dosbox_cpu_cycles_multiplier = 1000
+                        elif cpu_cycles < 90000:
+                            dosbox_cpu_cycles_multiplier = 10000
+                        elif cpu_cycles < 900000:
+                            dosbox_cpu_cycles_multiplier = 100000
+
+                        dosbox_cpu_cycles = math.ceil(cpu_cycles / dosbox_cpu_cycles_multiplier)
+                    if line.startswith('cputype'):
+                        dosbox_cpu_type = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('sbtype'):
+                        dosbox_sblaster_type = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('sbbase'):
+                        dosbox_sblaster_base = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('irq'):
+                        dosbox_sblaster_irq = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('dma'):
+                        dosbox_sblaster_dma = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('hdma'):
+                        dosbox_sblaster_hdma = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('oplmode'):
+                        dosbox_sblaster_opl_mode = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('oplemu'):
+                        dosbox_sblaster_opl_emu = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('pcspeaker'):
+                        dosbox_pcspeaker = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('tandy') and not line.startswith('tandyrate'):
+                        dosbox_tandy = line[line.rfind('=') + 1:].replace('"', '')
+                    if line.startswith('disney'):
+                        dosbox_disney = line[line.rfind('=') + 1:].replace('"', '')
+
+        core_path = self.get_config()['General'].get('Config location') + '/config/' + self.get_corename()
+        game_opt_file = open(self.get_config()['General'].get('Config location') + '/config/' + self.get_corename() +
+                             '/' + game_name + '.opt', 'w')
+        game_opt_file.write('dosbox_adv_options = "true"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_core = "' + dosbox_cpu_core + '"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_cycles = "' + str(dosbox_cpu_cycles) + '"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_cycles_fine = "1"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_cycles_mode = "fixed"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_cycles_multiplier = "' + str(dosbox_cpu_cycles_multiplier) + '"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_cycles_multiplier_fine = "1"' + os.linesep)
+        game_opt_file.write('dosbox_cpu_type = "' + dosbox_cpu_type + '"' + os.linesep)
+        game_opt_file.write('dosbox_disney = "' + dosbox_disney + '"' + os.linesep)
+        game_opt_file.write('dosbox_emulated_mouse = "enable"' + os.linesep)
+        game_opt_file.write('dosbox_emulated_mouse_deadzone = "5%"' + os.linesep)
+        game_opt_file.write('dosbox_machine_type = "' + dosbox_machine_type + '"' + os.linesep)
+        game_opt_file.write('dosbox_pcspeaker = "' + dosbox_pcspeaker + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_base = "' + dosbox_sblaster_base + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_dma = "' + dosbox_sblaster_dma + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_hdma = "' + dosbox_sblaster_hdma + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_irq = "' + dosbox_sblaster_irq + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_opl_emu = "' + dosbox_sblaster_opl_emu + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_opl_mode = "' + dosbox_sblaster_opl_mode + '"' + os.linesep)
+        game_opt_file.write('dosbox_sblaster_type = "' + dosbox_sblaster_type + '"' + os.linesep)
+        game_opt_file.write('dosbox_scaler = "' + dosbox_scaler + '"' + os.linesep)
+        game_opt_file.write('dosbox_tandy = "' + dosbox_tandy + '"' + os.linesep)
+        game_opt_file.write('dosbox_use_options = "true"' + os.linesep)
+        game_opt_file.close()
 
     name = 'RetroArch'
 
