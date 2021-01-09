@@ -25,6 +25,11 @@ class RetroArchLauncher(GameLauncher):
             if game_config.find('.') > 0:
                 game_config = game_config[:game_config.rfind('.')]
 
+            core_config = self.get_config()[self.game_data['platform']]
+            for entry in core_config:
+                if entry.lower() not in ['config location', 'core', 'video_shader']:
+                    self.launch_config[entry] = core_config[entry]
+
             game_config = game_config + '.cfg'
             if os.path.isfile(game_config):
                 with open(game_config) as f:
