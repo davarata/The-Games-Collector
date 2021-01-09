@@ -42,7 +42,7 @@ def add_game(game_desc_file, icon_file):
     # TODO Consider moving this somewhere else so that it will only be done once
     config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
 
-    launcher = init_launcher(game_descriptor, config)
+    launcher = init_launcher(game_descriptor, config, adding_game=True)
 
     if launcher.game_data.get('core') is not None and launcher.game_data['core'].endswith('scummvm_libretro.so'):
         add_scummvm_libretro_game(launcher, game_desc_file)
@@ -288,7 +288,7 @@ def get_game_dialog(game_data, config, message):
     return game_dialog
 
 
-def init_launcher(descriptor, config):
+def init_launcher(descriptor, config, adding_game=False):
     game_properties = descriptor['Game']
 
     if game_properties.get('Platform') is None or len(game_properties['Platform']) == 0:
@@ -317,7 +317,7 @@ def init_launcher(descriptor, config):
     check_expected_properties(launcher, game_properties)
 
     launcher.set_game_root(game_properties)
-    if not is_adding_scummvm_game(launcher):
+    if not adding_game or not is_adding_scummvm_game(launcher):
         launcher.set_target(game_properties)
         launcher.set_working_dir(game_properties)
 
