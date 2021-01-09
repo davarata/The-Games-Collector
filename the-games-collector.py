@@ -317,7 +317,7 @@ def init_launcher(descriptor, config):
     check_expected_properties(launcher, game_properties)
 
     launcher.set_game_root(game_properties)
-    if game_properties.get('target') != None:
+    if not is_adding_scummvm_game(launcher):
         launcher.set_target(game_properties)
         launcher.set_working_dir(game_properties)
 
