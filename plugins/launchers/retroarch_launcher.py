@@ -126,17 +126,15 @@ class RetroArchLauncher(GameLauncher):
             os.unlink(os.path.join(self.game_data['game_root'], 'cfg'))
 
     def get_core(self): # a hack for adding ScummVM games
-        if self.launcher_params is not None:
-            for param in self.launcher_params:
-                if param.startswith('core'):
-                    return param.split('=')[1].strip()
+        if self.launcher_params is not None and self.launcher_params.get('core') is not None:
+            return self.launcher_params['core']
         else:
             return self.get_retroarch_property('core')
 
 
     def set_launcher_data(self, descriptor):
         if self.launcher_params is not None and self.launcher_params.get('core') is not None:
-                self.game_data['core'] = self.launcher_params['core']
+            self.game_data['core'] = self.launcher_params['core']
         else:
             self.game_data['core'] = self.get_retroarch_property('core')
 
