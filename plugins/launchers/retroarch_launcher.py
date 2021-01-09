@@ -52,8 +52,6 @@ class RetroArchLauncher(GameLauncher):
             if self.game_data['platform'] == 'Arcade':
                 *_ignore, target = self.game_data['target'].rpartition('/')
                 target = 'roms/' + target
-            elif self.game_data['core'] == 'scummvm_libretro.so':
-                target = 'game'
             else:
                 target = self.game_data['target']
 
@@ -80,7 +78,7 @@ class RetroArchLauncher(GameLauncher):
         if not os.path.isdir(core_path):
             os.mkdir(core_path)
 
-        if (self.game_data.get('game_root') == None): # added for configuring ScummVM
+        if (self.game_data.get('target') == None): # added for configuring ScummVM
             return
 
         for l in ['states', 'saves']:
@@ -114,15 +112,6 @@ class RetroArchLauncher(GameLauncher):
             Path(self.game_data['game_root'] + '/cfg').symlink_to(self.game_data['game_root'])
         if self.game_data['core'].endswith('dosbox_libretro.so'):
             self.write_game_opt(game_name)
-        if self.game_data['core'].endswith('scummvm_libretro.so'):
-            if os.path.islink(self.get_config()['ScummVM'].get('Config location')):
-                os.unlink(self.get_config()['ScummVM'].get('Config location'))
-
-            if os.path.exists(self.get_config()['ScummVM'].get('Config location')):
-                raise Exception('The configuration location \'' + self.get_config()['ScummVM'].get(
-                    'Config location') + '\' exists.')
-
-            Path(self.get_config()['ScummVM'].get('Config location')).symlink_to(self.game_data['game_root'])
 
     def revert_env(self):
         super().revert_env()
@@ -130,11 +119,21 @@ class RetroArchLauncher(GameLauncher):
             os.unlink(os.path.join(self.game_data['game_root'], 'nvram'))
             os.unlink(os.path.join(self.game_data['game_root'], 'roms'))
             os.unlink(os.path.join(self.game_data['game_root'], 'cfg'))
-#        if self.game_data['core'].endswith('scummvm_libretro.so'):
-#            os.unlink(self.get_config()['ScummVM'].get('Config location'))
+
+    def get_core(self): # a hack for adding ScummVM games
+        if self.launcher_params is not None:
+            for param in self.launcher_params:
+                if param.startswith('core'):
+                    return param.split('=')[1].strip()
+        else:
+            return self.get_retroarch_property('core')
+
 
     def set_launcher_data(self, descriptor):
-        self.game_data['core'] = self.get_retroarch_property('core')
+        if self.launcher_params is not None and self.launcher_params.get('core') is not None:
+                self.game_data['core'] = self.launcher_params['core']
+        else:
+            self.game_data['core'] = self.get_retroarch_property('core')
 
         if self.game_data.get('core') is None:
             self.game_data['core'] = self.get_config()[self.game_data['platform']]['Core']
@@ -189,7 +188,10 @@ class RetroArchLauncher(GameLauncher):
         return value
 
     def get_corename(self):
-        core = self.get_retroarch_property('core')
+        if self.launcher_params is not None and self.launcher_params.get('core') is not None:
+            core = self.launcher_params['core']
+        else:
+            core = self.get_retroarch_property('core')
 
         coreinfo = ConfigManager.get_instance().get_config('coreinfo')
         if coreinfo is None:

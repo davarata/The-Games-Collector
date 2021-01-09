@@ -44,10 +44,114 @@ def add_game(game_desc_file, icon_file):
 
     launcher = init_launcher(game_descriptor, config)
 
-    add_descriptor(game_desc_file)
+    if launcher.game_data.get('core') is not None and launcher.game_data['core'].endswith('scummvm_libretro.so'):
+        add_scummvm_libretro_game(launcher, game_desc_file)
+    else:
+        add_descriptor(game_desc_file)
     add_menu_entry(launcher, game_descriptor['Game'])
     if icon_file is not None:
         icon_creator.add_icon(icon_file, config)
+
+
+def ask_question(question):
+    reply = input(question + ' [y/n]? ')
+    while not reply.lower() in {'y', 'n'}:
+        reply = input(question + ' [y/n]? ')
+    return reply
+
+
+def add_scummvm_libretro_game(launcher, game_desc_file):
+    try:
+        launcher.configure_env()
+
+        use_exising_scummvm_ini = False
+        game_scummvm_ini_path = launcher.game_data['game_root'] + '/scummvm.ini'
+        if os.path.isfile(game_scummvm_ini_path):
+            use_exising_scummvm_ini =\
+                ask_question('Use exising ScummVM configuration file (' + game_scummvm_ini_path + ')') == 'y'
+
+        if use_exising_scummvm_ini:
+            game_scummvm_ini = read_scummvm_ini_file(game_scummvm_ini_path)
+            if len(game_scummvm_ini.sections()) > 2:
+                raise Exception('The ' + game_scummvm_ini_path +
+                                ' ScummVM ini file contains more than one game section.')
+            elif len(game_scummvm_ini.sections()) == 2:
+                if 'scummvm' in game_scummvm_ini.sections():
+                    write_scummvm_ini_file(game_scummvm_ini, game_scummvm_ini_path, write_game_ini=True)
+                else:
+                    raise Exception('The ' + game_scummvm_ini_path +
+                                    ' ScummVM ini file contains more than one game section.')
+            else:
+                if 'scummvm' in game_scummvm_ini.sections():
+                    raise Exception('The ' + game_scummvm_ini_path + ' ScummVM ini file contains no game sections.')
+        else:
+            scummvm_ini_path = launcher.get_config()['General'].get('Config location') + '/system/scummvm.ini'
+            scummvm_ini =  read_scummvm_ini_file(scummvm_ini_path)
+
+            scummvm_ini['scummvm']['browser_lastpath'] = launcher.launcher_config['General']['Games Location']
+            write_scummvm_ini_file(scummvm_ini, scummvm_ini_path)
+
+            launcher.game_data['target'] = None
+            launcher.launch_game()
+
+            scummvm_ini =  read_scummvm_ini_file(scummvm_ini_path)
+
+            write_scummvm_ini_file(scummvm_ini, scummvm_ini_path)
+            write_scummvm_ini_file(scummvm_ini, game_scummvm_ini_path, write_game_ini=True)
+
+        game_scummvm_ini = read_scummvm_ini_file(game_scummvm_ini_path)
+        game_id = game_scummvm_ini.sections()[0]
+        scummvm_retroarch_file = open(launcher.game_data['game_root'] + '/' + game_id + '.scummvm', 'w')
+        scummvm_retroarch_file.write(game_id + os.linesep)
+        scummvm_retroarch_file.close()
+
+        descriptor = []
+        in_game_section = False
+        insert_index = 0
+        index = 0
+        with open(game_desc_file) as f:
+            for line in f:
+                if line.strip().startswith('['):
+                    in_game_section = line.strip() == '[Game]'
+                if line.strip().lower().startswith('target'):
+                    continue
+                if in_game_section and line.strip() != '':
+                    insert_index = index + 1
+                    descriptor.append(line)
+                    index = index + 1
+
+        descriptor.insert(insert_index, 'Target=' + game_id + '.scummvm' + os.linesep)
+        descriptor_file = open(
+            os.environ.get('HOME') + '/.config/the-games-collector/' + game_desc_file.rpartition('/')[2], 'w')
+        for entry in descriptor:
+            descriptor_file.write(entry)
+        descriptor_file.close()
+    finally:
+        revert_env(launcher)
+
+
+def read_scummvm_ini_file(scummvm_ini_path):
+    scummvm_ini = configparser.ConfigParser()
+    scummvm_ini.read(scummvm_ini_path)
+    return scummvm_ini
+
+
+def write_scummvm_ini_file(scummvm_ini, scummvm_ini_path, write_game_ini = False):
+    if write_game_ini:
+        for section in scummvm_ini.sections():
+            if section != 'scummvm':
+                game_scummvm_ini_file = open(scummvm_ini_path, 'w')
+                game_scummvm_ini_file.write('[' + section + ']' + os.linesep)
+                for key in scummvm_ini[section].keys():
+                    game_scummvm_ini_file.write(key + '=' + scummvm_ini[section][key] + os.linesep)
+                game_scummvm_ini_file.close()
+    else:
+        if scummvm_ini.has_section('scummvm'):
+            scummvm_ini_file = open(scummvm_ini_path, 'w')
+            scummvm_ini_file.write('[scummvm]' + os.linesep)
+            for key in scummvm_ini['scummvm'].keys():
+                scummvm_ini_file.write(key + '=' + scummvm_ini['scummvm'][key] + os.linesep)
+            scummvm_ini_file.close()
 
 
 # affected by launcher-specific details, such as platform names
@@ -105,6 +209,10 @@ def change_resolution(game_data):
         display_handler.get_implementation(ignore_versions=True).change_resolution(game_data['resolution'])
 
 
+def is_adding_scummvm_game(launcher):
+    return (launcher.name == 'RetroArch') and (launcher.get_core() == 'scummvm_libretro')
+
+
 def check_expected_properties(launcher, game_properties):
     # TODO
     # Each component should specify which properties they require, instead of all the properties
@@ -119,6 +227,8 @@ def check_expected_properties(launcher, game_properties):
     missing_properties = launcher.required_properties.difference(properties)
     if len(missing_properties) > 0:
         for property in missing_properties:
+            if property == 'target' and is_adding_scummvm_game(launcher):
+                continue
             # TODO decide what to do about reusable strings
             print('The \'{}\' property is required by the {}'.format(property, launcher.name + ' launcher.'))
             sys.exit(1)
@@ -186,16 +296,16 @@ def init_launcher(descriptor, config):
         sys.exit(1)
 
     launcher_name = None
-    launcher_params = None
+    launcher_params = {}
     if game_properties.get('Launcher') is not None and len(game_properties['Launcher']) > 0:
-        launcher_name, *launcher_params = [p.strip() for p in game_properties['Launcher'].split(',')]
-        launcher_params = [p.lower() for p in launcher_params]
+        launcher_name, *params = [p.strip() for p in game_properties['Launcher'].split(',')]
+        for launcher_param in [p.lower() for p in params]:
+            key, value = launcher_param.strip().split('=')
+            launcher_params[key.strip()] = value.strip()
 
     version = None
-    if launcher_params is not None:
-        for param in launcher_params:
-            if param.startswith('version'):
-                version = param.split('=')[1]
+    if launcher_params.get('version') is not None:
+        version = launcher_params['version']
 
     launcher = game_launcher.get_implementation(game_properties['Platform'], launcher_name, version=version)
 
@@ -207,8 +317,9 @@ def init_launcher(descriptor, config):
     check_expected_properties(launcher, game_properties)
 
     launcher.set_game_root(game_properties)
-    launcher.set_target(game_properties)
-    launcher.set_working_dir(game_properties)
+    if game_properties.get('target') != None:
+        launcher.set_target(game_properties)
+        launcher.set_working_dir(game_properties)
 
     set_id(launcher.game_data, game_properties)
     set_optical_disk(launcher.game_data, game_properties)
@@ -435,14 +546,9 @@ def configure(id):
     launcher.game_data['platform'] = id
 
     try:
-        scummvm_ini_path = launcher.get_config()['General'].get('Config location') + '/system/'
-        if os.path.isfile(scummvm_ini_path + 'tgc_scummvm.ini'):
-            os.rename(scummvm_ini_path + 'tgc_scummvm.ini', scummvm_ini_path + 'scummvm.ini')
         launcher.set_launcher_data(None)
         launcher.configure_env()
         launcher.launch_game()
-        if os.path.isfile(scummvm_ini_path + 'scummvm.ini'):
-            os.rename(scummvm_ini_path + 'scummvm.ini', scummvm_ini_path + 'tgc_scummvm.ini')
     finally:
         launcher.revert_env()
 
