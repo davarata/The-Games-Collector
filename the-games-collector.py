@@ -430,6 +430,23 @@ def get_mapping_token(string, separators):
     return working_string, remaining_string
 
 
+def configure(id):
+    launcher = game_launcher.get_implementation(name='RetroArch')
+    launcher.game_data['platform'] = id
+
+    try:
+        scummvm_ini_path = launcher.get_config()['General'].get('Config location') + '/system/'
+        if os.path.isfile(scummvm_ini_path + 'tgc_scummvm.ini'):
+            os.rename(scummvm_ini_path + 'tgc_scummvm.ini', scummvm_ini_path + 'scummvm.ini')
+        launcher.set_launcher_data(None)
+        launcher.configure_env()
+        launcher.launch_game()
+        if os.path.isfile(scummvm_ini_path + 'scummvm.ini'):
+            os.rename(scummvm_ini_path + 'scummvm.ini', scummvm_ini_path + 'tgc_scummvm.ini')
+    finally:
+        launcher.revert_env()
+
+
 def validate_all():
     config = ConfigManager.get_instance().load_config('game-launcher', skip_inst_dir=True)
     # TODO remove hard-coded config locations
@@ -459,6 +476,10 @@ launch_parser.set_defaults(action='play')
 launch_parser.add_argument('id')
 launch_parser.add_argument('-c', '--config-location')
 launch_parser.add_argument('-i', '--installation-location')
+
+launch_parser = sub_parsers.add_parser('configure')
+launch_parser.set_defaults(action='configure')
+launch_parser.add_argument('id')
 
 launch_parser = sub_parsers.add_parser('validate-all')
 launch_parser.set_defaults(action='validate-all')
@@ -490,5 +511,7 @@ elif args.action == 'play':
         launch_game(args.id)
     finally:
         display_handler.restore_resolution()
+elif args.action == 'configure':
+    configure(args.id)
 elif args.action == 'validate-all':
     validate_all()

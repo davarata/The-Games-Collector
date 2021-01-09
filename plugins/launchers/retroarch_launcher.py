@@ -20,49 +20,58 @@ class RetroArchLauncher(GameLauncher):
             return super(RetroArchLauncher, self).get_platform_description()
 
     def launch_game(self):
-        game_config = self.game_data['target']
-        if game_config.find('.') > 0:
-            game_config = game_config[:game_config.rfind('.')]
+        if self.game_data.get('target') != None:
+            game_config = self.game_data['target']
+            if game_config.find('.') > 0:
+                game_config = game_config[:game_config.rfind('.')]
 
-        game_config = game_config + '.cfg'
-        if os.path.isfile(game_config):
-            with open(game_config) as f:
-                for line in f:
-                    conf_entry = line.split('=')
-                    if len(conf_entry) > 1:
-                        self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
+            game_config = game_config + '.cfg'
+            if os.path.isfile(game_config):
+                with open(game_config) as f:
+                    for line in f:
+                        conf_entry = line.split('=')
+                        if len(conf_entry) > 1:
+                            self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
 
-        mapping_config = '/tmp/retroarch-mappings.cfg'
-        if os.path.isfile(mapping_config):
-            with open(mapping_config) as f:
-                for line in f:
-                    conf_entry = line.split('=')
-                    if len(conf_entry) > 1:
-                        self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
+            mapping_config = '/tmp/retroarch-mappings.cfg'
+            if os.path.isfile(mapping_config):
+                with open(mapping_config) as f:
+                    for line in f:
+                        conf_entry = line.split('=')
+                        if len(conf_entry) > 1:
+                            self.launch_config[conf_entry[0].strip()] = conf_entry[1].strip()
 
-        config_file = open('/tmp/game-launcher.cfg', 'w')
-        for key in sorted(self.launch_config.keys()):
-            if key not in ['core', 'video_shader', 'savefile_directory', 'savestate_directory']:
-                config_file.write(key + ' = ' + self.launch_config[key] + os.linesep)
-        config_file.close()
-        config_files = '/tmp/game-launcher.cfg'
+            config_file = open('/tmp/game-launcher.cfg', 'w')
+            for key in sorted(self.launch_config.keys()):
+                if key not in ['core', 'video_shader', 'savefile_directory', 'savestate_directory']:
+                    config_file.write(key + ' = ' + self.launch_config[key] + os.linesep)
+            config_file.close()
+            config_files = '/tmp/game-launcher.cfg'
 
-        if self.game_data['platform'] == 'Arcade':
-            *_ignore, target = self.game_data['target'].rpartition('/')
-            target = 'roms/' + target
-        elif self.game_data['core'] == 'scummvm_libretro.so':
-            target = 'game'
+        if self.game_data.get('target') != None:
+            if self.game_data['platform'] == 'Arcade':
+                *_ignore, target = self.game_data['target'].rpartition('/')
+                target = 'roms/' + target
+            elif self.game_data['core'] == 'scummvm_libretro.so':
+                target = 'game'
+            else:
+                target = self.game_data['target']
+
+        if self.game_data.get('target') != None:
+            parameters = [
+                self.get_executable(),
+                target,
+                '--libretro',
+                self.game_data['core'],
+                '--appendconfig',
+                config_files]
+            subprocess.Popen(parameters, cwd=self.game_data['working_dir']).wait()
         else:
-            target = self.game_data['target']
-
-        parameters = [
-            self.get_executable(),
-            target,
-            '--libretro',
-            self.game_data['core'],
-            '--appendconfig',
-            config_files]
-        subprocess.Popen(parameters, cwd=self.game_data['working_dir']).wait()
+            parameters = [
+                self.get_executable(),
+                '--libretro',
+                self.game_data['core']]
+            subprocess.Popen(parameters).wait()
 
     def configure_env(self):
         super().configure_env()
@@ -70,6 +79,9 @@ class RetroArchLauncher(GameLauncher):
         core_path = self.get_config()['General'].get('Config location') + '/config/' + self.get_corename()
         if not os.path.isdir(core_path):
             os.mkdir(core_path)
+
+        if (self.game_data.get('game_root') == None): # added for configuring ScummVM
+            return
 
         for l in ['states', 'saves']:
             if os.path.islink(self.get_config()['General'].get('Config location') + '/' + l):
@@ -118,8 +130,8 @@ class RetroArchLauncher(GameLauncher):
             os.unlink(os.path.join(self.game_data['game_root'], 'nvram'))
             os.unlink(os.path.join(self.game_data['game_root'], 'roms'))
             os.unlink(os.path.join(self.game_data['game_root'], 'cfg'))
-        if self.game_data['core'].endswith('scummvm_libretro.so'):
-            os.unlink(self.get_config()['ScummVM'].get('Config location'))
+#        if self.game_data['core'].endswith('scummvm_libretro.so'):
+#            os.unlink(self.get_config()['ScummVM'].get('Config location'))
 
     def set_launcher_data(self, descriptor):
         self.game_data['core'] = self.get_retroarch_property('core')
@@ -148,17 +160,18 @@ class RetroArchLauncher(GameLauncher):
                             ' version ' + version + ' does not exist.')
 
     def get_retroarch_property(self, name, value = ''):
-        game_config = self.game_data['target']
-        if game_config.find('.') > 0:
-            game_config = game_config[:game_config.rfind('.')]
-        game_config = game_config + '.cfg'
+        if (self.game_data.get('target') != None): # added for configuring ScummVM
+            game_config = self.game_data['target']
+            if game_config.find('.') > 0:
+                game_config = game_config[:game_config.rfind('.')]
+            game_config = game_config + '.cfg'
 
-        if os.path.isfile(game_config):
-            with open(game_config) as f:
-                for line in f:
-                    entries = line.split("=")
-                    if entries[0].strip().lower() == name.lower():
-                        return entries[1].replace('"', '').strip()
+            if os.path.isfile(game_config):
+                with open(game_config) as f:
+                    for line in f:
+                        entries = line.split("=")
+                        if entries[0].strip().lower() == name.lower():
+                            return entries[1].replace('"', '').strip()
 
         config = self.get_config()
         if config is not None and config.has_section(self.game_data['platform']):
@@ -186,17 +199,18 @@ class RetroArchLauncher(GameLauncher):
             if core is not None and coreinfo.has_section(core):
                 return coreinfo[core]['corename'].replace('"', '')
 
-        config = self.get_config()
-        if config is not None and config.has_section(self.game_data['platform']):
-            info_file = config['Launcher']['cores location'] + '/' + core + '.info'
+        if len(self.game_data) > 0: # added for configuring ScummVM
+            config = self.get_config()
+            if config is not None and config.has_section(self.game_data['platform']):
+                info_file = config['Launcher']['cores location'] + '/' + core + '.info'
 
-            with open(info_file) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith('corename'):
-                        *_ignore, corename = line.rpartition('=')
-                        corename = corename.replace('"', '')
-                        return corename.strip()
+                with open(info_file) as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith('corename'):
+                            *_ignore, corename = line.rpartition('=')
+                            corename = corename.replace('"', '')
+                            return corename.strip()
 
         return ''
 
