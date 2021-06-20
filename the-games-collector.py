@@ -86,7 +86,7 @@ def add_scummvm_libretro_game(launcher, game_desc_file):
                     raise Exception('The ' + game_scummvm_ini_path + ' ScummVM ini file contains no game sections.')
         else:
             scummvm_ini_path = launcher.get_config()['General'].get('Config location') + '/system/scummvm.ini'
-            scummvm_ini =  read_scummvm_ini_file(scummvm_ini_path)
+            scummvm_ini = read_scummvm_ini_file(scummvm_ini_path)
 
             scummvm_ini['scummvm']['browser_lastpath'] = launcher.launcher_config['General']['Games Location']
             write_scummvm_ini_file(scummvm_ini, scummvm_ini_path)
@@ -94,7 +94,7 @@ def add_scummvm_libretro_game(launcher, game_desc_file):
             launcher.game_data['target'] = None
             launcher.launch_game()
 
-            scummvm_ini =  read_scummvm_ini_file(scummvm_ini_path)
+            scummvm_ini = read_scummvm_ini_file(scummvm_ini_path)
 
             write_scummvm_ini_file(scummvm_ini, scummvm_ini_path)
             write_scummvm_ini_file(scummvm_ini, game_scummvm_ini_path, write_game_ini=True)
@@ -136,7 +136,7 @@ def read_scummvm_ini_file(scummvm_ini_path):
     return scummvm_ini
 
 
-def write_scummvm_ini_file(scummvm_ini, scummvm_ini_path, write_game_ini = False):
+def write_scummvm_ini_file(scummvm_ini, scummvm_ini_path, write_game_ini=False):
     if write_game_ini:
         for section in scummvm_ini.sections():
             if section != 'scummvm':
@@ -567,6 +567,7 @@ def validate_all():
             print(file)
             raise
 
+
 parser = argparse.ArgumentParser()
 sub_parsers = parser.add_subparsers()
 
@@ -616,7 +617,7 @@ elif args.action == 'play':
     try:
         launch_game(args.id)
     finally:
-        display_handler.restore_resolution()
+        display_handler.get_implementation(ignore_versions=True).restore_resolution()
 elif args.action == 'configure':
     configure(args.id)
 elif args.action == 'validate-all':

@@ -48,7 +48,7 @@ class XrandrDisplayHandler(DisplayHandler):
                 if resolutions[right] != 'current':
                     outputs[right]['mode'] = resolutions[right]
 
-        resolution_changed = True
+        self.resolution_changed = True
         # TODO: build_xrandr_parameters adds an extra space at the end which causes xrandr to throw an error. fix it
         xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(outputs).strip()
         subprocess.Popen(xrandr_cmd.split(' ')).wait()
@@ -67,6 +67,9 @@ class XrandrDisplayHandler(DisplayHandler):
         xrandr_cmd = 'xrandr ' + self.build_xrandr_parameters(self.saved_outputs).strip()
         print(xrandr_cmd)
         subprocess.Popen(xrandr_cmd.split(' ')).wait()
+        # Bit of a hack. This is to avoid the resolution getting changed twice. Once now, and once in the finally clause
+        # in the_games_collector, after launch_game(...) finished.
+        self.resolution_changed = False
 
     def get_display_outputs(self):
         outputs = []
